@@ -17,6 +17,11 @@ import state.edge.Timeout;
 import state.edge.UseItem;
 
 public class DoPatches extends Module {
+	
+	public String toString() {
+		return "Do Patches";
+	}
+	
 	public DoPatches(Location loc, State initial, State success, State critical) {
 		super(initial, success, critical);
 

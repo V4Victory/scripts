@@ -7,7 +7,6 @@ import org.powerbot.game.api.Manifest;
 import org.powerbot.game.api.methods.Environment;
 import org.powerbot.game.api.methods.interactive.Players;
 
-import scripts.farming.modules.CheckWorkload;
 import scripts.farming.modules.DoPatches;
 import scripts.farming.modules.RunOtherScript;
 import state.Condition;
@@ -42,13 +41,18 @@ public class DJHarvest extends ActiveScript {
 				}
 			}, ScriptWrapper.class);
 
-	CheckWorkload MODULE_LOCATION = new CheckWorkload(INITIAL,
-			ON_CHOOSE_LOCATION, START_OTHER_SCRIPT);
 
 	// PatchModule MODULE_FALADOR = new PatchModule();
 	Module MODULE_FALADOR;
 
 	protected void setup() {
+		
+		INITIAL.add(new Edge(new Condition() {
+			public boolean validate() {
+				return Patches.countAllWork()>0;
+			}
+		}, ON_CHOOSE_LOCATION));
+		
 		Option<Location> chooseLocation = new Option<Location>(Condition.TRUE,
 				new OptionSelector<Location>() {
 					public Location select() {
@@ -56,8 +60,7 @@ public class DJHarvest extends ActiveScript {
 						Integer mostWorkCount = 0;
 						// select the location with the most work to do
 						for (Location location : Location.locations) {
-							if (location.isActivated()
-									&& mostWorkCount < location.countWork(false)) {
+							if (location.activated && mostWorkCount < location.countWork(false)) {
 								mostWorkCount = location.countWork(false);
 								loc = location;
 							}
@@ -80,8 +83,11 @@ public class DJHarvest extends ActiveScript {
 					});
 			state.add(chooseTeleport);
 			state.add(new Timeout(INITIAL, 2000));
+			
 			for (Module module : location.getTeleportOptions()) {
-				chooseTeleport.add(module, reached);
+				chooseTeleport.add(module, module.getInitialState());
+				module.getSuccessState().add(new Edge(Condition.TRUE,reached));
+				module.getCriticalState().add(new Edge(Condition.TRUE,CRITICAL_FAIL));
 			}
 
 			Module doPatches = new DoPatches(location, reached, INITIAL,

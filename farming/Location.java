@@ -1,25 +1,30 @@
 package scripts.farming;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.powerbot.game.api.util.Filter;
 import org.powerbot.game.api.wrappers.Area;
+import org.powerbot.game.api.wrappers.Tile;
 
+import scripts.farming.modules.RunMorytania;
 import state.Module;
+import state.State;
 
 public class Location {
 
-	public Location(String name_, Area area_, Module... tele_) {
+	public Location(String name_, Area area_, ModuleCreator moduleCreator_) {
 		name = name_;
 		area = area_;
-		teleportOptions = tele_;
-		if (teleportOptions.length > 0)
-			selectedTeleportOption = teleportOptions[0];
+		moduleCreator = moduleCreator_;
 	}
 
 	String name;
 	Area area;
+	ModuleCreator moduleCreator;
 
 	public Area getArea() {
 		return area;
@@ -29,27 +34,24 @@ public class Location {
 		return name;
 	}
 
-	Module[] teleportOptions;
-
-	public Module[] getTeleportOptions() {
-		return teleportOptions;
+	public Set<Module> getTeleportOptions() {
+		if (teleportOptions == null) {
+			return teleportOptions = new HashSet<Module>(
+					Arrays.asList(moduleCreator.createModules(new State(),
+							new State(), new State())));
+		} else {
+			return teleportOptions;
+		}
 	}
 
+	Set<Module> teleportOptions = null;
 	public Module selectedTeleportOption = null;
 
-	public static Option Disabled = new Option() {
-		public String toString() {
-			return "Disabled";
-		}
-
-		public void run() {
-		}
-	};
-	
 	public List<Patch> getPatches() {
 		List<Patch> patches = new ArrayList<Patch>();
-		for(Patch patch : Patches.patches.values()) {
-			if(patch.getLocation() == this) patches.add(patch);
+		for (Patch patch : Patches.patches.values()) {
+			if (patch.getLocation() == this)
+				patches.add(patch);
 		}
 		return patches;
 	}
@@ -62,10 +64,7 @@ public class Location {
 		return null;
 	}
 
-	public boolean isActivated() {
-		return selectedTeleportOption != Location.Disabled
-				&& selectedTeleportOption != null;
-	}
+	public boolean activated = true;
 
 	public int countWork(final boolean diseasedToo) {
 		return Patches.getPatches(new Filter<Patch>() {
@@ -78,7 +77,35 @@ public class Location {
 		}).size();
 	}
 
-	public static final Location[] locations = {};
-	// public static final int y
-
+	public static final Location[] locations = {
+			new Location("Morytania", new Area(new Tile(3594, 3533, 0),
+					new Tile(3609, 3518, 0)), new ModuleCreator() {
+				public Module[] createModules(State i, State s, State c) {
+					return new Module[] { new RunMorytania(i, s, c) };
+				}
+			}),
+			new Location("Falador", new Area(new Tile(3048, 3314, 0), new Tile(
+					3063, 3300, 0)), new ModuleCreator() {
+				public Module[] createModules(State i, State s, State c) {
+					return new Module[] {};
+				}
+			}),
+			new Location("Ardougne", new Area(new Tile(3048, 3314, 0),
+					new Tile(3063, 3300, 0)), new ModuleCreator() {
+				public Module[] createModules(State i, State s, State c) {
+					return new Module[] {};
+				}
+			}),
+			new Location("Catherby", new Area(new Tile(3048, 3314, 0),
+					new Tile(3063, 3300, 0)), new ModuleCreator() {
+				public Module[] createModules(State i, State s, State c) {
+					return new Module[] {};
+				}
+			}),
+			new Location("Trollheim", new Area(new Tile(3048, 3314, 0),
+					new Tile(3063, 3300, 0)), new ModuleCreator() {
+				public Module[] createModules(State i, State s, State c) {
+					return new Module[] {};
+				}
+			}) };
 }

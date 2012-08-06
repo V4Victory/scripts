@@ -24,12 +24,7 @@ import javax.swing.JPanel;
 
 import org.reflections.Reflections;
 
-import djharvest.Location;
-import djharvest.Option;
-import djharvest.Patch;
-import djharvest.Patches;
-import djharvest.ScriptWrapper;
-import djharvest.Seed;
+import state.Module;
 
 public class GUI extends JFrame {
 	
@@ -56,7 +51,7 @@ public class GUI extends JFrame {
 	String selectedScriptName = null;
 
 	JComboBox<Location> locations = new JComboBox<Location>(Location.locations);
-	JComboBox<Option> teleports = new JComboBox<Option>();
+	JComboBox<Module> teleports = new JComboBox<Module>();
 	JComboBox<Patch> patches = new JComboBox<Patch>();
 	JComboBox<Seed> seeds = new JComboBox<Seed>();
 	JComboBox<String> patchTypes = new JComboBox<String>();
@@ -91,11 +86,11 @@ public class GUI extends JFrame {
 					patches.removeAllItems();
 					if (location == null)
 						return;
-					Option[] options = location.getTeleportOptions();
+					Set<Module> options = location.getTeleportOptions();
 					if (location.selectedTeleportOption != null) {
 						teleports.addItem(location.selectedTeleportOption);
 					}
-					for (Option option : options) {
+					for (Module option : options) {
 						if (option != location.selectedTeleportOption)
 							teleports.addItem(option);
 					}
@@ -112,7 +107,7 @@ public class GUI extends JFrame {
 					if (e.getStateChange() == ItemEvent.SELECTED) {
 						if (locations.getSelectedItem() == null)
 							return;
-						((Location) locations.getSelectedItem()).selectedTeleportOption = (Option) teleports
+						((Location) locations.getSelectedItem()).selectedTeleportOption = (Module) teleports
 								.getSelectedItem();
 					}
 				}
@@ -280,7 +275,7 @@ public class GUI extends JFrame {
 				System.out.println(lname);
 				if (location != null) {
 					System.out.println(ltele);
-					for (Option option : location.getTeleportOptions()) {
+					for (Module option : location.getTeleportOptions()) {
 						System.out.println(option.toString());
 						if (option.toString().equals(ltele))
 							location.selectedTeleportOption = option;

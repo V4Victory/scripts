@@ -8,10 +8,8 @@ import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.Tile;
 
 import scripts.MapleLongbowFletch;
-
-
-import djharvest.Magic;
-import djharvest.ScriptWrapper;
+import scripts.farming.Magic;
+import scripts.farming.ScriptWrapper;
 
 
 @ScriptWrapper

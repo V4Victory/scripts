@@ -25,6 +25,10 @@ import state.edge.Task;
 import state.tools.OptionSelector;
 
 public class RunOtherScript extends Module {
+	
+	public String toString() {
+		return "Run Other Script";
+	}
 
 	Set<Class<?>> scripts;
 	List<Strategy> newStrategies;

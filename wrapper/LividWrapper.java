@@ -13,8 +13,8 @@ import org.powerbot.game.api.wrappers.node.Item;
 
 import ox5377656c6c.livid.Constants;
 import ox5377656c6c.livid.doLivid;
-import djharvest.Magic;
-import djharvest.ScriptWrapper;
+import scripts.farming.Magic;
+import scripts.farming.ScriptWrapper;
 
 
 @ScriptWrapper
