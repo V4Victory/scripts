@@ -7,6 +7,9 @@ import org.powerbot.game.api.Manifest;
 import org.powerbot.game.api.methods.Environment;
 import org.powerbot.game.api.methods.interactive.Players;
 
+import scripts.farming.modules.CheckWorkload;
+import scripts.farming.modules.DoPatches;
+import scripts.farming.modules.RunOtherScript;
 import state.Condition;
 import state.Module;
 import state.State;
@@ -15,9 +18,6 @@ import state.edge.Edge;
 import state.edge.Option;
 import state.edge.Timeout;
 import state.tools.OptionSelector;
-import farming.modules.CheckWorkload;
-import farming.modules.DoPatches;
-import farming.modules.RunOtherScript;
 
 @Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
 public class DJHarvest extends ActiveScript {
