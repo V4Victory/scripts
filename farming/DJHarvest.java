@@ -30,16 +30,7 @@ public class DJHarvest extends ActiveScript {
 	State START_OTHER_SCRIPT = new State();
 	State LOAD_GUI = new State();
 	
-	RunOtherScript MODULE_RUN_SCRIPT = new RunOtherScript(START_OTHER_SCRIPT,
-			INITIAL, CRITICAL_FAIL, null, new Condition() {
-				public boolean validate() {
-					return Patches.countAllWork() == 0;
-				}
-			}, new Condition() {
-				public boolean validate() {
-					return Patches.countAllWork() > 9;
-				}
-			}, ScriptWrapper.class);
+
 
 
 	// PatchModule MODULE_FALADOR = new PatchModule();
@@ -101,7 +92,18 @@ public class DJHarvest extends ActiveScript {
 		LOAD_GUI.add(new Edge(new Condition() {
 			public boolean validate() { return gui.isDone(); }
 		},INITIAL));
-
+		
+		RunOtherScript MODULE_RUN_SCRIPT = new RunOtherScript(START_OTHER_SCRIPT,
+				INITIAL, CRITICAL_FAIL, null, new Condition() {
+					public boolean validate() {
+						return Patches.countAllWork() == 0 && gui.scriptsEnabled;
+					}
+				}, new Condition() {
+					public boolean validate() {
+						return Patches.countAllWork() > 9;
+					}
+				}, ScriptWrapper.class);
+		
 		provide(new StateStrategy(LOAD_GUI, Condition.TRUE));
 	}
 }

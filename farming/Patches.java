@@ -48,7 +48,7 @@ public class Patches {
 	public static Integer countAllWork() {
 		Integer count = 0;
 		for(Patch patch : patches.values()) {
-			if(patch.isActivated() && (patch.isDead() || patch.isDiseased() || patch.getProgress() == 1.0
+			if(patch.activated && (patch.isDead() || patch.isDiseased() || patch.getProgress() == 1.0
 					|| patch.isEmpty())) count += getTypeRating(patch.getType());
 		}
 		return count;

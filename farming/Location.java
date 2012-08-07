@@ -69,7 +69,7 @@ public class Location {
 	public int countWork(final boolean diseasedToo) {
 		return Patches.getPatches(new Filter<Patch>() {
 			public boolean accept(Patch p) {
-				if (!p.isActivated() || p.getLocation() != Location.this)
+				if (!p.activated || p.getLocation() != Location.this)
 					return false;
 				return p.isDead() || (diseasedToo && p.isDiseased())
 						|| p.getProgress() == 1.0 || p.isEmpty();

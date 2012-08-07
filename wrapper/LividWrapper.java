@@ -34,7 +34,7 @@ public class LividWrapper {
 		if (mudstaff != null)
 			mudstaff.getWidgetChild().click(true);
 
-		Magic.cast(Magic.Lunar.TeleportMoonClan);
+		Magic.cast(Magic.Lunar.TeleportMoonClan.getWidgetId());
 		Time.sleep(4300);
 		Walking.walk(new Tile(2113,3929,0));
 		Time.sleep(1300);

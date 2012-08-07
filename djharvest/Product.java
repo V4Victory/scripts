@@ -1,4 +1,4 @@
-package djharvest;
+package scripts.djharvest;
 
 import java.util.HashMap;
 
@@ -31,7 +31,7 @@ public class Product {
 		id = id_;
 		name = name_;
 		processOptions = options;
-		selectedProcessOption = processOptions[0];
+		selectedProcessOption = processOptions[processOptions.length-1];
 	}
 	
 	public static ProcessOption DontProcess = new ProcessOption() {

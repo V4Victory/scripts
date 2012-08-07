@@ -1,4 +1,4 @@
-package djharvest;
+package scripts.djharvest;
 import java.util.Map;
 
 import org.powerbot.game.api.methods.Settings;

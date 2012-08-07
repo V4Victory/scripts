@@ -1,4 +1,4 @@
-package djharvest;
+package scripts.djharvest;
 
 public @interface ScriptWrapper {
 

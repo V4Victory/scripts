@@ -14,7 +14,7 @@ public class Patch {
 	}
 
 	public String getHarvestingInteraction() {
-		switch(type) {
+		switch(getType()) {
 		case Patches.Herb:
 		case Patches.Flower:
 			return "Pick";
@@ -28,11 +28,9 @@ public class Patch {
 	private int getState() {
 		return Settings.get(setting,shift,0xff);
 	}
-	public boolean isActivated() {
-		return selectedSeed != null && selectedSeed.getId()>0;
-	}
+	public boolean activated = true;
 	public boolean isDead() {
-		if(type == Patches.Herb){
+		if(getType() == Patches.Herb){
 			if(getState()>=0xc0 && getState()<=0xcb) {
 				return getState() >= 0xc9 && getState() <= 0xcb;
 			} else if(getState()>=0xcc && getState()<=0xd7) {
@@ -40,7 +38,7 @@ public class Patch {
 			} else {
 				return getState() >= 0xaa && getState() <= 0xac;
 			}
-		} else if(type == Patches.Tree) {
+		} else if(getType() == Patches.Tree) {
 			return (getState() & 0xc0) == 0x80;
 		}	else {
 			return (getState() & 0xc0) == 0xc0;
@@ -50,7 +48,7 @@ public class Patch {
 		return getState()<4 ? 3-(getState() & 0x3) : 0;
 	}
 	public double getProgress() {
-		int state = getState() & ((type==Patches.Herb) ? 0x7f : 0x3f);
+		int state = getState() & ((getType()==Patches.Herb) ? 0x7f : 0x3f);
 		Seed seed = getCorrespondingSeed();
 		if(seed == null) return 0;
 		if(seed.getMid()-seed.getLow() == 0) return 0;
@@ -63,7 +61,7 @@ public class Patch {
 		return !isDead() && !isDiseased() && !isEmpty() && getProgress()<1.0;
 	}
 	public boolean isDiseased() {
-		if(type == Patches.Herb){
+		if(getType() == Patches.Herb){
 			if(getState()>=0xc0 && getState()<=0xcb) {
 				return getState() >= 0xc6 && getState() <= 0xc8;
 			} else if(getState()>=0xcc && getState()<=0xd7) {
@@ -71,41 +69,46 @@ public class Patch {
 			} else {
 				return (getState() & 0x80) == 0x80;
 			}
-		} else if(type == Patches.Tree) {
+		} else if(getType() == Patches.Tree) {
 			return (getState() & 0xc0) == 0x40;
 		}	else {
 			return (getState() & 0xc0) == 0x80;
 		}
 	}
 	public boolean isWatered() {
-		return type==Patches.Herb ? false : (getState() & 0xc0) == 0x40;
+		return getType()==Patches.Herb ? false : (getState() & 0xc0) == 0x40;
 	}
 	public boolean useSecateurs() {
-		return type==Patches.Herb || type==Patches.Allotment || type==Patches.Hops;
+		return getType()==Patches.Herb || getType()==Patches.Allotment || getType()==Patches.Hops;
 	}
 	public boolean canWater() {
-		return type!=Patches.Herb && type!=Patches.Tree;
+		return getType()!=Patches.Herb && getType()!=Patches.Tree;
 	}
 	public Seed getCorrespondingSeed() {
 		int s = getState();
 		for(Map.Entry<Integer,Seed> seed : Seed.seeds.entrySet()) {
-			if(seed.getValue().getType() == type && seed.getValue().getLow()<=s && s<=seed.getValue().getHigh()) {
+			if(seed.getValue().getType() == getType() && seed.getValue().getLow()<=s && s<=seed.getValue().getHigh()) {
 				return seed.getValue();
 			}
 		}
 		return null;
 	}
 	
+	// patch collection = all patches of a given type
+	public Patch(int type_) {
+		setType(type_);
+	}
+	
 	public Patch(int id_, Location location_, int type_, int setting_, int shift_) {
 		id = id_;
-		type = type_;
+		setType(type_);
 		setting = setting_;
 		shift = shift_*4;
 		location = location_;
 	}
 	
 	public String toString() {
-		return Patches.getTypeName(type);
+		return Patches.getTypeName(getType());
 	}
 	
 	public boolean compost = false;
@@ -123,5 +126,9 @@ public class Patch {
 	private Timer timer = new Timer(0);
 	public Timer getTimer() {
 		return timer;
+	}
+
+	public void setType(int type) {
+		this.type = type;
 	}
 }

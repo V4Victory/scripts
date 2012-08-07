@@ -1,31 +1,34 @@
 package scripts.farming.modules;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.concurrent.strategy.StrategyDaemon;
 import org.powerbot.game.api.ActiveScript;
-import org.powerbot.game.api.util.Time;
 import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
-import org.reflections.Reflections;
 
 import state.Condition;
 import state.Module;
 import state.State;
 import state.edge.ExceptionSafeTask;
 import state.edge.Option;
-import state.edge.Task;
 import state.tools.OptionSelector;
 
 public class RunOtherScript extends Module {
-	
+
 	public String toString() {
 		return "Run Other Script";
 	}
@@ -39,8 +42,9 @@ public class RunOtherScript extends Module {
 			OptionSelector<Class<?>> selector, final Condition run,
 			final Condition interrupt, Class<? extends Annotation> annotation) {
 		super(initial, success, critical);
-		Reflections reflection = new Reflections();
-		scripts = reflection.getTypesAnnotatedWith(annotation);
+
+		scripts = new HashSet<Class<?>>(getClassesForPackage(""));
+
 		Option<Class<?>> option = new Option<Class<?>>(run, selector);
 		initial.add(option);
 		for (final Class<?> script : scripts) {
@@ -121,5 +125,80 @@ public class RunOtherScript extends Module {
 
 	public Set<Class<?>> getScripts() {
 		return scripts;
+	}
+
+	/**
+	 * Attempts to list all the classes in the specified package as determined
+	 * by the context class loader
+	 * 
+	 * @param pckgname
+	 *            the package name to search
+	 * @return a list of classes that exist within that package
+	 * @throws ClassNotFoundException
+	 *             if something went wrong
+	 */
+	private static List<Class<?>> getClassesForPackage(String pckgname) {
+		// This will hold a list of directories matching the pckgname. There may
+		// be more than one if a package is split over multiple jars/paths
+		ArrayList<File> directories = new ArrayList<File>();
+		try {
+			try {
+				ClassLoader cld = Thread.currentThread()
+						.getContextClassLoader();
+				if (cld == null) {
+					throw new ClassNotFoundException("Can't get class loader.");
+				}
+				String path = pckgname.replace('.', '/');
+				// Ask for all resources for the path
+				Enumeration<URL> resources = cld.getResources(path);
+				while (resources.hasMoreElements()) {
+					directories.add(new File(URLDecoder.decode(resources
+							.nextElement().getPath(), "UTF-8")));
+				}
+			} catch (NullPointerException x) {
+				throw new ClassNotFoundException(
+						pckgname
+								+ " does not appear to be a valid package (Null pointer exception)");
+			} catch (UnsupportedEncodingException encex) {
+				throw new ClassNotFoundException(
+						pckgname
+								+ " does not appear to be a valid package (Unsupported encoding)");
+			} catch (IOException ioex) {
+				throw new ClassNotFoundException(
+						"IOException was thrown when trying to get all resources for "
+								+ pckgname);
+			}
+
+			ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+			// For every directory identified capture all the .class files
+			for (File directory : directories) {
+				if (directory.exists()) {
+					// Get the list of the files contained in the package
+					String[] files = directory.list();
+					for (String file : files) {
+						// we are only interested in .class files
+						if (file.endsWith(".class")) {
+							// removes the .class extension
+							try {
+								classes.add(Class.forName(pckgname + '.'
+										+ file.substring(0, file.length() - 6)));
+							} catch (NoClassDefFoundError e) {
+								// do nothing. this class hasn't been found by
+								// the
+								// loader, and we don't care.
+							}
+						}
+					}
+				} else {
+					throw new ClassNotFoundException(pckgname + " ("
+							+ directory.getPath()
+							+ ") does not appear to be a valid package");
+				}
+			}
+			return classes;
+		} catch (ClassNotFoundException e) {
+			System.out.println(e.getMessage());// reflection.getTypesAnnotatedWith(annotation);
+			return new ArrayList<Class<?>>();
+		}
 	}
 }

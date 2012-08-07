@@ -1,4 +1,4 @@
-package djharvest;
+package scripts.djharvest;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,10 +15,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -42,22 +47,18 @@ import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;
 import org.powerbot.game.api.methods.interactive.Players;
 import org.powerbot.game.api.methods.node.Menu;
-import org.powerbot.game.api.methods.node.SceneEntities;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.widget.Bank;
 import org.powerbot.game.api.methods.widget.Camera;
-import org.powerbot.game.api.util.Filter;
 import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.util.Timer;
 import org.powerbot.game.api.wrappers.node.Item;
 import org.powerbot.game.api.wrappers.node.SceneObject;
-import org.powerbot.game.api.wrappers.node.SceneObjectDefinition;
 import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
 import org.powerbot.game.bot.event.listener.PaintListener;
-import org.reflections.Reflections;
 
-//@Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
+@Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
 public class DJHarvest extends ActiveScript implements PaintListener {
 	boolean setupGUI = false,setup = false;
 	Timer timer;
@@ -377,9 +378,13 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 			try {
 				for (int i = 0; i < Patches.COUNT_TYPES; i++)
 					patchTypes.addItem(Patches.getTypeName(i));
-				Reflections ref = new Reflections("scripts.wrapper");
-				final Set<Class<?>> subTypes = ref
-						.getTypesAnnotatedWith(ScriptWrapper.class);
+				final List<Class<?>> classes = DJHarvest.getClassesForPackage("");
+				final Set<Class<?>> subTypes = new HashSet<Class<?>>();
+				for(Class<?> clazz : classes) {
+					if(clazz.getAnnotation(ScriptWrapper.class) != null) {
+						subTypes.add(clazz);
+					}
+				}
 				for (Class<?> myClass : subTypes) {
 					System.out.println(myClass.getName());
 					scripts.addItem(myClass.getName());
@@ -887,6 +892,71 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 					y += 15;
 				}
 			}
+		}
+	}
+	
+	private static List<Class<?>> getClassesForPackage(String pckgname) {
+		// This will hold a list of directories matching the pckgname. There may
+		// be more than one if a package is split over multiple jars/paths
+		ArrayList<File> directories = new ArrayList<File>();
+		try {
+			try {
+				ClassLoader cld = Thread.currentThread()
+						.getContextClassLoader();
+				if (cld == null) {
+					throw new ClassNotFoundException("Can't get class loader.");
+				}
+				String path = pckgname.replace('.', '/');
+				// Ask for all resources for the path
+				Enumeration<URL> resources = cld.getResources(path);
+				while (resources.hasMoreElements()) {
+					directories.add(new File(URLDecoder.decode(resources
+							.nextElement().getPath(), "UTF-8")));
+				}
+			} catch (NullPointerException x) {
+				throw new ClassNotFoundException(
+						pckgname
+								+ " does not appear to be a valid package (Null pointer exception)");
+			} catch (UnsupportedEncodingException encex) {
+				throw new ClassNotFoundException(
+						pckgname
+								+ " does not appear to be a valid package (Unsupported encoding)");
+			} catch (IOException ioex) {
+				throw new ClassNotFoundException(
+						"IOException was thrown when trying to get all resources for "
+								+ pckgname);
+			}
+
+			ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+			// For every directory identified capture all the .class files
+			for (File directory : directories) {
+				if (directory.exists()) {
+					// Get the list of the files contained in the package
+					String[] files = directory.list();
+					for (String file : files) {
+						// we are only interested in .class files
+						if (file.endsWith(".class")) {
+							// removes the .class extension
+							try {
+								classes.add(Class.forName(pckgname + '.'
+										+ file.substring(0, file.length() - 6)));
+							} catch (NoClassDefFoundError e) {
+								// do nothing. this class hasn't been found by
+								// the
+								// loader, and we don't care.
+							}
+						}
+					}
+				} else {
+					throw new ClassNotFoundException(pckgname + " ("
+							+ directory.getPath()
+							+ ") does not appear to be a valid package");
+				}
+			}
+			return classes;
+		} catch (ClassNotFoundException e) {
+			System.out.println(e.getMessage());// reflection.getTypesAnnotatedWith(annotation);
+			return new ArrayList<Class<?>>();
 		}
 	}
 }

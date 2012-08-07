@@ -1,4 +1,4 @@
-package djharvest;
+package scripts.djharvest;
 import org.powerbot.game.api.methods.Tabs;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;

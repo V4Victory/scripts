@@ -1,16 +1,11 @@
-package djharvest;
+package scripts.djharvest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.powerbot.game.api.util.Filter;
-import org.powerbot.game.api.wrappers.node.Item;
-import org.powerbot.game.api.wrappers.node.ItemDefinition;
-import org.powerbot.game.client.RSItemDef;
 
 public class Seed {
 	public Seed(String name_, int id_, int t_, int low_, int mid_) {

@@ -78,7 +78,7 @@ public class RunMorytania extends Module {
 			}
 		}, ECTOFUNTUS_DONE, ECTOFUNTUS_REFILL_MANUALLY));
 
-		ECTOFUNTUS_REFILL_MANUALLY.add(new UseItem(Condition.TRUE,ECTOFUNTUS_REFILL,4251,SceneEntities.getNearest(12345)));
+		ECTOFUNTUS_REFILL_MANUALLY.add(new UseItem(Condition.TRUE,ECTOFUNTUS_REFILL,4251,12345));
 
 		ECTOFUNTUS_DONE.add(new WalkPath(Condition.TRUE, path, SUCCESS,
 				new Timeout(FAIL, 10000)));
