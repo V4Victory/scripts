@@ -24,7 +24,7 @@ public class FletchWrapper {
 	}
 	
 	public static void prepare() {
-		Magic.cast(Magic.Lunar.TeleportMoonClan);
+		Magic.cast(Magic.Lunar.TeleportMoonClan.getWidgetId());
 		Time.sleep(4300);
 		Walking.walk(new Tile(2098,3919,0));
 		Time.sleep(1300);
