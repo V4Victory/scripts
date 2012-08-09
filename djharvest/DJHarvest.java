@@ -84,14 +84,7 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 		settingsPath = new File(Environment.getStorageDirectory(), Players
 				.getLocal().getName() + "-djharvest-settings.ini");
 		System.out.println(settingsPath);
-		
-		/* Give those items to the leprechaun */
-		Product.products.get(2485).selectedProcessOption = Product.GiveToLeprechaun;
-		Product.products.get(3051).selectedProcessOption = Product.GiveToLeprechaun;
-		Product.products.get(225).selectedProcessOption = Product.GiveToLeprechaun;
-		Product.products.get(6055).selectedProcessOption = Product.Drop;
-		Product.products.get(5986).selectedProcessOption = Product.GiveToLeprechaun;
-		
+
 		/* load and save settings */
 		loadSettings();
 		gui = new GUI();

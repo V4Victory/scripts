@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.powerbot.qd;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.concurrent.strategy.StrategyDaemon;
 import org.powerbot.game.api.ActiveScript;
@@ -81,7 +82,6 @@ public class RunOtherScript extends Module {
 					Field strategiesField = StrategyDaemon.class
 							.getDeclaredField("strategies");
 					strategiesField.setAccessible(true);
-
 					List<Strategy> strategies = (List<Strategy>) strategiesField
 							.get(sd);
 
