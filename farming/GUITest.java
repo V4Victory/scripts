@@ -2,11 +2,15 @@ package scripts.farming;
 
 import java.io.FileDescriptor;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.security.Permission;
 
+import org.powerbot.ef;
+import org.powerbot.qe;
+import org.powerbot.se;
 import org.powerbot.game.api.ActiveScript;
 
 public class GUITest {
@@ -175,6 +179,24 @@ public class GUITest {
 	}
 
 	public static void main(String[] args) {
+		try {
+		Field f = org.powerbot.dc.class.getDeclaredField("z");
+		f.setAccessible(true);
+		String[] z = (String[])f.get(null);
+		for(String s : z) {
+			System.out.println(s);
+		}
+
+		
+		se sei = se.a();
+		ef efi = new ef(sei);
+		qe qei = new qe(efi);
+		//qei.setVisible(false);
+		System.out.println(qei.getComponentCount());
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 		System.setSecurityManager(new CustomSecurityManager());
 		try {
 			Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass("scripts.farming.GUITest");
