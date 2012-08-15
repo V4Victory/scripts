@@ -26,7 +26,7 @@ import state.edge.Timeout;
 import state.tools.OptionSelector;
 
 @Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
-public class DJHarvest extends ActiveScript implements PaintListener {
+public class FarmingProject extends ActiveScript implements PaintListener {
 
 	Timer timer = new Timer(0);
 

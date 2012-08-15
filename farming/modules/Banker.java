@@ -10,7 +10,7 @@ import java.util.Set;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.widget.Bank;
 
-import scripts.farming.DJHarvest;
+import scripts.farming.FarmingProject;
 import scripts.farming.Location;
 import state.Condition;
 import state.ConsecutiveState;
@@ -27,7 +27,7 @@ import state.tools.OptionSelector;
 
 public class Banker extends SharedModule {
 	// id -> amount
-	public Map<Integer, Integer> getRequirements(DJHarvest main) {
+	public Map<Integer, Integer> getRequirements(FarmingProject main) {
 		Map<Integer, Integer> items = new HashMap<Integer, Integer>();
 		List<Module> modules = new ArrayList<Module>();
 		modules.add(main.MODULE_RUN_SCRIPT);
@@ -46,7 +46,7 @@ public class Banker extends SharedModule {
 
 	public Method method = Method.IDLE;
 
-	public Banker(final DJHarvest main, State initial, State success,
+	public Banker(final FarmingProject main, State initial, State success,
 			State critical) {
 		super("Banker", initial, success, critical);
 

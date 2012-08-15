@@ -12,7 +12,7 @@ import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
 
-import scripts.farming.DJHarvest;
+import scripts.farming.FarmingProject;
 import scripts.farming.ScriptWrapper;
 import state.Condition;
 import state.Module;
@@ -26,7 +26,7 @@ public class RunOtherScript extends Module {
 	public Class<?> runningScript = null;
 	public ActiveScript activeScript;
 
-	public RunOtherScript(final DJHarvest main, State initial, State success,
+	public RunOtherScript(final FarmingProject main, State initial, State success,
 			State critical, OptionSelector<Class<?>> selector,
 			final Condition run, final Condition interrupt) {
 		super("Run other script", initial, success, critical);
