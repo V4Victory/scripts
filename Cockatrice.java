@@ -56,7 +56,7 @@ public class Cockatrice extends ActiveScript implements PaintListener {
 				Time.sleep(700);
 			}
 
-			while (Inventory.getCount() < 0) {
+			while (Inventory.getCount(1944) == 0) {
 				Bank.withdraw(1944, 0);
 				Time.sleep(700);
 			}
