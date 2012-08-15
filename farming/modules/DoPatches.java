@@ -132,7 +132,7 @@ public class DoPatches extends Module {
 		// UseItem(Condition.TRUE,curing,123456789,patch.getSceneObject()));
 		clearing.add(new Animation(Condition.TRUE, 830, clearing, new Timeout(
 				processProducts, 1000)));
-		clearingFailed.add(new Notification(Condition.TRUE, state,
+		clearingFailed.add(new Notification(Condition.TRUE, processProducts,
 				"Clearing failed"));
 
 		// check if you should wear secateurs
@@ -157,11 +157,11 @@ public class DoPatches extends Module {
 			}
 		}, harvesting, sceneObject, patch.getHarvestingInteraction(), true));
 		harvesting.add(new Animation(Condition.TRUE, 2292, processProducts, new Timeout(
-				harvestingFailed, 3000)));
+				harvestingFailed, 10000)));
 		harvesting.add(new Animation(Condition.TRUE, 830, clearing,
 				new Timeout(harvestingFailed, 3000)));
 		harvesting.add(new Animation(Condition.TRUE, 2282, processProducts, new Timeout(
-				harvestingFailed, 3000)));
+				harvestingFailed, 10000)));
 
 		harvestingFailed.add(new Notification(Condition.TRUE, state,
 				"Harvesting failed"));

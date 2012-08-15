@@ -86,11 +86,17 @@ public class PathRecorder extends ActiveScript implements KeyListener,
 			if (state != State.NIL) {
 				System.out.println("new Tile[] {");
 				boolean b = false;
+				Tile lastTile = null;
 				for (Tile tile : currentPath) {
-					System.out.print(b ? "," : "");
-					System.out.println("new Tile(" + tile.getX() + ","
-							+ tile.getY() + "," + tile.getPlane() + ")");
-					b = true;
+					// filter wrong tiles
+					if (lastTile != null
+							&& tile.distance(lastTile) < minimalDistance * 1.5) {
+						System.out.print(b ? "," : "");
+						System.out.println("new Tile(" + tile.getX() + ","
+								+ tile.getY() + "," + tile.getPlane() + ")");
+						b = true;
+					}
+					lastTile = tile;
 				}
 				System.out.println("};");
 			}
