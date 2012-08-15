@@ -2,9 +2,9 @@ package scripts.farming.modules;
 
 import org.powerbot.game.api.methods.tab.Inventory;
 
-import state.Condition;
-import state.Constant;
-import state.Value;
+import scripts.state.Condition;
+import scripts.state.Constant;
+import scripts.state.Value;
 
 public class Requirement extends Condition {
 	public int amount;

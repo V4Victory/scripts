@@ -11,10 +11,8 @@ import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.methods.Environment;
 
 import scripts.farming.modules.RunOtherScript;
-import state.Condition;
-import state.Module;
-import state.State;
-import state.tools.OptionSelector;
+
+import scripts.state.*;
 
 public class GUITest {
 

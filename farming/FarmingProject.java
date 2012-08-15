@@ -16,14 +16,14 @@ import org.powerbot.game.bot.event.listener.PaintListener;
 import scripts.farming.modules.Banker;
 import scripts.farming.modules.DoPatches;
 import scripts.farming.modules.RunOtherScript;
-import state.Condition;
-import state.Module;
-import state.State;
-import state.StateStrategy;
-import state.edge.Edge;
-import state.edge.Option;
-import state.edge.Timeout;
-import state.tools.OptionSelector;
+import scripts.state.Condition;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.StateStrategy;
+import scripts.state.edge.Option;
+import scripts.state.edge.Edge;
+import scripts.state.edge.Timeout;
+import scripts.state.tools.OptionSelector;
 
 @Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
 public class FarmingProject extends ActiveScript implements PaintListener {

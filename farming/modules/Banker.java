@@ -12,18 +12,18 @@ import org.powerbot.game.api.methods.widget.Bank;
 
 import scripts.farming.FarmingProject;
 import scripts.farming.Location;
-import state.Condition;
-import state.ConsecutiveState;
-import state.Module;
-import state.SharedModule;
-import state.State;
-import state.StateCreator;
-import state.Value;
-import state.edge.Edge;
-import state.edge.Option;
-import state.edge.Task;
-import state.edge.Timeout;
-import state.tools.OptionSelector;
+import scripts.state.Condition;
+import scripts.state.ConsecutiveState;
+import scripts.state.Module;
+import scripts.state.SharedModule;
+import scripts.state.State;
+import scripts.state.StateCreator;
+import scripts.state.Value;
+import scripts.state.edge.Edge;
+import scripts.state.edge.Option;
+import scripts.state.edge.Task;
+import scripts.state.edge.Timeout;
+import scripts.state.tools.OptionSelector;
 
 public class Banker extends SharedModule {
 	// id -> amount

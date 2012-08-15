@@ -3,16 +3,16 @@ package scripts.farming.modules;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.wrappers.Tile;
 
-import state.Condition;
-import state.Module;
-import state.State;
-import state.edge.AnimationPath;
-import state.edge.Either;
-import state.edge.InteractItem;
-import state.edge.Notification;
-import state.edge.Timeout;
-import state.edge.UseItem;
-import state.edge.WalkPath;
+import scripts.state.Condition;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.edge.AnimationPath;
+import scripts.state.edge.Either;
+import scripts.state.edge.InteractItem;
+import scripts.state.edge.Notification;
+import scripts.state.edge.Timeout;
+import scripts.state.edge.UseItem;
+import scripts.state.edge.WalkPath;
 
 @Target("Morytania")
 public class EctovialMorytania extends Module {

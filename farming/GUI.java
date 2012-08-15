@@ -34,7 +34,8 @@ import org.powerbot.game.api.util.Filter;
 
 import scripts.djharvest.ScriptWrapper;
 import scripts.farming.modules.RunOtherScript;
-import state.Module;
+
+import scripts.state.Module;
 
 public class GUI extends JFrame {
 

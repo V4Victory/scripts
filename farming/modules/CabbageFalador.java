@@ -4,15 +4,15 @@ import org.powerbot.game.api.methods.node.SceneEntities;
 import org.powerbot.game.api.wrappers.Tile;
 import org.powerbot.game.api.wrappers.node.SceneObject;
 
-import state.Condition;
-import state.Module;
-import state.State;
-import state.Value;
-import state.edge.AnimationPath;
-import state.edge.InteractItem;
-import state.edge.InteractSceneObject;
-import state.edge.Timeout;
-import state.edge.Walk;
+import scripts.state.Condition;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.Value;
+import scripts.state.edge.AnimationPath;
+import scripts.state.edge.InteractItem;
+import scripts.state.edge.InteractSceneObject;
+import scripts.state.edge.Timeout;
+import scripts.state.edge.Walk;
 
 @Target("Falador")
 public class CabbageFalador extends Module {

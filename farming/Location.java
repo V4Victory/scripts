@@ -7,16 +7,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.powerbot.game.api.methods.interactive.Players;
-import org.powerbot.game.api.methods.widget.Bank;
-import org.powerbot.game.api.util.Filter;
 import org.powerbot.game.api.wrappers.Area;
 import org.powerbot.game.api.wrappers.Tile;
 
 import scripts.farming.modules.Target;
-import state.Condition;
-import state.Module;
-import state.State;
-import state.edge.Edge;
+import scripts.state.Condition;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.edge.Edge;
 
 public class Location {
 

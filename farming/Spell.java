@@ -3,7 +3,8 @@ package scripts.farming;
 import org.powerbot.game.api.methods.tab.Skills;
 
 import scripts.farming.Magic.Spellbook;
-import state.Condition;
+
+import scripts.state.Condition;
 
 public class Spell {
 	String name;

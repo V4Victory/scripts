@@ -14,12 +14,12 @@ import org.powerbot.game.bot.Context;
 
 import scripts.farming.FarmingProject;
 import scripts.farming.ScriptWrapper;
-import state.Condition;
-import state.Module;
-import state.State;
-import state.edge.ExceptionSafeTask;
-import state.edge.Option;
-import state.tools.OptionSelector;
+import scripts.state.Condition;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.edge.ExceptionSafeTask;
+import scripts.state.edge.Option;
+import scripts.state.tools.OptionSelector;
 
 public class RunOtherScript extends Module {
 	List<Strategy> newStrategies;

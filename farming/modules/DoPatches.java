@@ -1,27 +1,26 @@
 package scripts.farming.modules;
 
-import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.wrappers.node.SceneObject;
 
 import scripts.djharvest.Product;
 import scripts.farming.Location;
 import scripts.farming.Magic;
 import scripts.farming.Patch;
-import state.Condition;
-import state.ConsecutiveState;
-import state.Module;
-import state.State;
-import state.StateCreator;
-import state.Value;
-import state.edge.Animation;
-import state.edge.Edge;
-import state.edge.InteractItem;
-import state.edge.InteractSceneObject;
-import state.edge.MagicCast;
-import state.edge.Notification;
-import state.edge.Task;
-import state.edge.Timeout;
-import state.edge.UseItemWithSceneObject;
+import scripts.state.Condition;
+import scripts.state.ConsecutiveState;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.StateCreator;
+import scripts.state.Value;
+import scripts.state.edge.Animation;
+import scripts.state.edge.Edge;
+import scripts.state.edge.InteractItem;
+import scripts.state.edge.InteractSceneObject;
+import scripts.state.edge.MagicCast;
+import scripts.state.edge.Notification;
+import scripts.state.edge.Task;
+import scripts.state.edge.Timeout;
+import scripts.state.edge.UseItemWithSceneObject;
 
 public class DoPatches extends Module {
 

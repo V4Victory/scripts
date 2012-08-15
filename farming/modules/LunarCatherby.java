@@ -3,13 +3,13 @@ package scripts.farming.modules;
 import org.powerbot.game.api.wrappers.Tile;
 
 import scripts.farming.Magic;
-import state.Condition;
-import state.Module;
-import state.State;
-import state.edge.Animation;
-import state.edge.MagicCast;
-import state.edge.Timeout;
-import state.edge.WalkPath;
+import scripts.state.Condition;
+import scripts.state.Module;
+import scripts.state.State;
+import scripts.state.edge.Animation;
+import scripts.state.edge.MagicCast;
+import scripts.state.edge.Timeout;
+import scripts.state.edge.WalkPath;
 
 @Target("Catherby")
 public class LunarCatherby extends Module {
