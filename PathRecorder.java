@@ -92,6 +92,7 @@ public class PathRecorder extends ActiveScript implements KeyListener,
 							+ tile.getY() + "," + tile.getPlane() + ")");
 					b = true;
 				}
+				System.out.println("};");
 			}
 			break;
 		case 'r':
