@@ -12,7 +12,7 @@ import scripts.farming.Magic;
 import scripts.farming.ScriptWrapper;
 
 
-@ScriptWrapper
+@ScriptWrapper(banking = true)
 public class FletchWrapper {
 
 	private static MapleLongbowFletch instance = null;
@@ -33,13 +33,12 @@ public class FletchWrapper {
 		Bank.depositInventory();
 	}
 
-	public static boolean cleanup() {
+	public static void cleanup() {
 		Bank.open();
 		Time.sleep(1300,1500);
 		Bank.depositInventory();
 		Time.sleep(1300,1500);
 		Bank.close();
-		return true;
 	}
 
 

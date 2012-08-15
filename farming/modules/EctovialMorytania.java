@@ -1,6 +1,5 @@
 package scripts.farming.modules;
 
-import org.powerbot.game.api.methods.node.SceneEntities;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.wrappers.Tile;
 
@@ -15,15 +14,11 @@ import state.edge.Timeout;
 import state.edge.UseItem;
 import state.edge.WalkPath;
 
-public class RunMorytania extends Module {
-
-	public String toString() {
-		return "Ectovial";
-	}
-
-	public RunMorytania(State INITIAL, State SUCCESS, State CRITICAL) {
-		super(INITIAL, SUCCESS, CRITICAL);
-		// Integer[] refillAnimations = new Integer[] { 9609, 8939, 8941, 832 };
+@Target("Morytania")
+public class EctovialMorytania extends Module {
+	public EctovialMorytania(State INITIAL, State SUCCESS, State CRITICAL) {
+		super("Ectovial", INITIAL, SUCCESS, CRITICAL,
+				new Requirement[] { new Requirement(1,Constants.Ectophial)});		// Integer[] refillAnimations = new Integer[] { 9609, 8939, 8941, 832 };
 		Integer[] refillAnimations = new Integer[] { 832 };
 
 		Tile[] path = new Tile[] { new Tile(3658, 3522, 0),
@@ -59,18 +54,10 @@ public class RunMorytania extends Module {
 		 */
 		State FAIL = new State();
 
-		State VIAL_FOUND = new State();
-
-		INITIAL.add(new Either(new Condition() {
-			public boolean validate() {
-				return Inventory.getCount(4251) > 0;
-			}
-		}, VIAL_FOUND, CRITICAL));
-
-		VIAL_FOUND.add(new InteractItem(Condition.TRUE, ECTOFUNTUS_REFILL,
-				4251, "Empty"));
+		INITIAL.add(new InteractItem(Condition.TRUE, ECTOFUNTUS_REFILL,
+				Constants.Ectophial, "Empty"));
 		ECTOFUNTUS_REFILL.add(new AnimationPath(Condition.TRUE,
-				refillAnimations, ECTOFUNTUS_DONE, new Timeout(FAIL, 10000)));
+				refillAnimations, ECTOFUNTUS_CHECK, new Timeout(FAIL, 10000)));
 
 		ECTOFUNTUS_CHECK.add(new Either(new Condition() {
 			public boolean validate() {

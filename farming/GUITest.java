@@ -1,17 +1,20 @@
 package scripts.farming;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.security.Permission;
 
-import org.powerbot.ef;
-import org.powerbot.qe;
-import org.powerbot.se;
 import org.powerbot.game.api.ActiveScript;
+import org.powerbot.game.api.methods.Environment;
+
+import scripts.farming.modules.RunOtherScript;
+import state.Condition;
+import state.Module;
+import state.State;
+import state.tools.OptionSelector;
 
 public class GUITest {
 
@@ -21,50 +24,6 @@ public class GUITest {
 		protected void setup() {
 			System.out.println("Setup!");
 		}
-	}
-
-	public static class ScriptWrapper<D extends ActiveScript> {
-		Class<D> scriptClass;
-
-		public ScriptWrapper(Class<D> sc) {
-			scriptClass = sc;
-		}
-
-		public ActiveScript newInstance() {
-			Constructor<D> c;
-			try {
-				c = scriptClass.getConstructor();
-				return c.newInstance();
-			} catch (NoSuchMethodException | SecurityException
-					| InstantiationException | IllegalAccessException
-					| IllegalArgumentException | InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-
-		}
-
-		public ActiveScript newInstance2() {
-			Constructor<D> c;
-			try {
-				return scriptClass.newInstance();
-			} catch (SecurityException | InstantiationException
-					| IllegalAccessException | IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-
-		}
-	}
-
-	public static class MyScriptWrapper extends ScriptWrapper<MyScript> {
-
-		public MyScriptWrapper() {
-			super(MyScript.class);
-		}
-
 	}
 
 	public static class NullSecurityManager extends SecurityManager {
@@ -179,51 +138,9 @@ public class GUITest {
 	}
 
 	public static void main(String[] args) {
-		try {
-		Field f = org.powerbot.dc.class.getDeclaredField("z");
-		f.setAccessible(true);
-		String[] z = (String[])f.get(null);
-		for(String s : z) {
-			System.out.println(s);
-		}
-
-		
-		se sei = se.a();
-		ef efi = new ef(sei);
-		qe qei = new qe(efi);
-		//qei.setVisible(false);
-		System.out.println(qei.getComponentCount());
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-
-		System.setSecurityManager(new CustomSecurityManager());
-		try {
-			Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass("scripts.farming.GUITest");
-			clazz.newInstance();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		//ClassLoader cl = new MyClassLoader();
-		MyScriptWrapper mysw = new MyScriptWrapper();
-		try {
-			ActiveScript as = mysw.newInstance();
-			Method setup = ActiveScript.class.getDeclaredMethod("setup");
-			setup.setAccessible(true);
-			setup.invoke(as);
-			
-			Class<?> clazz = MyScript.class;
-			as = (ActiveScript)clazz.newInstance();
-			setup = ActiveScript.class.getDeclaredMethod("setup");
-			setup.setAccessible(true);
-			setup.invoke(as);
-		} catch (NoSuchMethodException | SecurityException
-				| IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException | InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		final GUI gui;
+		ScriptLoader loader = new ScriptLoader();
+		gui = new GUI(new File("farming-settings.ini"), loader);
 
 	}
 

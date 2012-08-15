@@ -1,9 +1,9 @@
-package scripts.farming;
+package scripts.farming.modules;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ScriptWrapper {
-	public boolean banking() default true;
+public @interface Target {
+	public String value();
 }

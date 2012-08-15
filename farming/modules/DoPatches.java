@@ -1,8 +1,11 @@
 package scripts.farming.modules;
 
+import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.wrappers.node.SceneObject;
 
+import scripts.djharvest.Product;
 import scripts.farming.Location;
+import scripts.farming.Magic;
 import scripts.farming.Patch;
 import state.Condition;
 import state.ConsecutiveState;
@@ -14,104 +17,160 @@ import state.edge.Animation;
 import state.edge.Edge;
 import state.edge.InteractItem;
 import state.edge.InteractSceneObject;
+import state.edge.MagicCast;
 import state.edge.Notification;
 import state.edge.Task;
 import state.edge.Timeout;
-import state.edge.UseItem;
 import state.edge.UseItemWithSceneObject;
 
 public class DoPatches extends Module {
 
-	public String toString() {
-		return "Do Patches";
+	static boolean locationNeedsSecateurs(Location loc) {
+		for (Patch patch : loc.getPatches()) {
+			if (patch.useSecateurs() && patch.activated)
+				return true;
+		}
+		return false;
+	}
+
+	static Requirement getSeedRequirements(Location loc) {
+		Requirement req = new Requirement(0, 0); // neutral element
+		for (Patch patch : loc.getPatches()) {
+			if (patch.activated && patch.selectedSeed != null)
+				req.and(new Requirement(0, patch.selectedSeed.getId()));
+		}
+		return req;
 	}
 
 	public DoPatches(Location loc, State initial, State success, State critical) {
-		super(initial, success, critical);
+		super(
+				"Do Patches",
+				initial,
+				success,
+				critical,
+				new Requirement[] {
+						new Requirement(0, Constants.AstralRune),
+						getSeedRequirements(loc),
+						new Requirement(
+								1,
+								locationNeedsSecateurs(loc) ? Constants.MagicSecateurs
+										: 0),
+						new Requirement(1, Constants.MudBattleStaff)
+								.or(new Requirement(1,
+										Constants.MysticMudBattleStaff)) });
 
 		initial.add(new Edge(Condition.TRUE, new ConsecutiveState<Patch>(loc
 				.getPatches(), success, new StateCreator<Patch>() {
 			public State getState(final Patch patch, State nextState) {
-				return doPatch(patch).add(new Edge(new Condition() {
-					public boolean validate() {
-						return patch.isGrowing();
-					}
-				}, nextState)).add(new Timeout(nextState, 5000));
+				return doPatch(patch, nextState).add(
+						new Timeout(nextState, 5000));
 			}
 		})));
 	}
 
-	public State doPatch(final Patch patch) {
-		Value<SceneObject> sceneObject = new Value<SceneObject>() { public SceneObject get() { return patch.getSceneObject(); }};
-		State state = new State();
-		State processProducts = new State();
+	public State doPatch(final Patch patch, State nextState) {
+		Value<SceneObject> sceneObject = new Value<SceneObject>() {
+			public SceneObject get() {
+				return patch.getSceneObject();
+			}
+		};
 
-		// after idling for 5 seconds, stop script
-		state.add(new Timeout(getCriticalState(), 5000));
+		State state = new State("PATCH");
+		state.add(new Edge(new Condition() {
+			public boolean validate() {
+				return patch.isGrowing() || !patch.activated;
+			}
+		}, nextState));
+		State processProducts = new State("PROC");
+
+		// after idling for 25 seconds, stop script
+		state.add(new Timeout(getCriticalState(), 25000));
 
 		// Rake the patch
-		State raking = new State();
-		State rakingFailed = new State();
+		State raking = new State("RAK");
+		State rakingFailed = new State("RAKF");
 		state.add(new InteractSceneObject(new Condition() {
 			public boolean validate() {
 				return patch.countWeeds() > 0;
 			}
-		}, raking, sceneObject, "Rake"));
-		raking.add(new Animation(Condition.TRUE, 2273, processProducts,
-				new Timeout(rakingFailed, 3000)));
-		rakingFailed.add(new Notification(Condition.TRUE, state,
+		}, raking, sceneObject, "Rake", true));
+		raking.add(new Animation(Condition.TRUE, 2273, processProducts, new Timeout(
+				rakingFailed, 7000)));
+		rakingFailed.add(new Notification(Condition.TRUE, processProducts,
 				"Raking failed"));
 
 		// Cure disease
-		State curing = new State();
-		State curingFailed = new State();
-		state.add(new InteractSceneObject(Condition.TRUE, curing, sceneObject, "Rake"));
+		state.add(new InteractItem(new Condition() {
+			public boolean validate() {
+				return patch.isDiseased();
+			}
+		}, state, Constants.MudBattleStaff, "Wield"));
+		State cureCasted = new State("CURC");
+		State curing = new State("CUR");
+		State curingFailed = new State("CURF");
+		state.add(new MagicCast(new Condition() {
+			public boolean validate() {
+				return patch.isDiseased();
+			}
+		}, cureCasted, state, Magic.Lunar.CurePlant));
+		cureCasted.add(new InteractSceneObject(Condition.TRUE, curing,
+				sceneObject, "Cure", true));
 		curing.add(new Animation(Condition.TRUE, 2273, state, new Timeout(
 				curingFailed, 3000)));
 		curingFailed.add(new Notification(Condition.TRUE, state,
 				"Curing failed"));
 
 		// Clear dead
-		State clearing = new State();
-		State clearingFailed = new State();
+		State clearing = new State("CLR");
+		State clearingFailed = new State("CLRF");
+		state.add(new InteractSceneObject(new Condition() {
+			public boolean validate() {
+				return patch.isDead();
+			}
+		}, clearing, sceneObject, "Clear", true));
 		// state.add(new
 		// UseItem(Condition.TRUE,curing,123456789,patch.getSceneObject()));
 		clearing.add(new Animation(Condition.TRUE, 830, clearing, new Timeout(
-				state, 1000)));
+				processProducts, 1000)));
 		clearingFailed.add(new Notification(Condition.TRUE, state,
 				"Clearing failed"));
 
 		// check if you should wear secateurs
 		state.add(new InteractItem(new Condition() {
 			public boolean validate() {
-				return patch.useSecateurs();
+				return patch.useSecateurs() && patch.getProgress() >= 1.0;
 			}
-		}, state, 123456789, "Equip"));
+		}, state, Constants.MagicSecateurs, "Wield"));
+		
+		state.add(new InteractItem(new Condition() {
+			public boolean validate() {
+				return !patch.useSecateurs() || patch.isEmpty();
+			}
+		}, state, Constants.MudBattleStaff, "Wield"));
 
 		// harvest
-		State harvesting = new State();
-		State harvestingFailed = new State();
+		State harvesting = new State("HARV");
+		State harvestingFailed = new State("HARVF");
 		state.add(new InteractSceneObject(new Condition() {
 			public boolean validate() {
-				return patch.getProgress() == 1.0;
+				return patch.getProgress() >= 1.0;
 			}
-		}, harvesting, sceneObject ,
-				patch.getHarvestingInteraction(), true));
-		harvesting.add(new Animation(Condition.TRUE, 2292, state, new Timeout(
+		}, harvesting, sceneObject, patch.getHarvestingInteraction(), true));
+		harvesting.add(new Animation(Condition.TRUE, 2292, processProducts, new Timeout(
 				harvestingFailed, 3000)));
-		harvesting.add(new Animation(Condition.TRUE, 830, clearing, new Timeout(
+		harvesting.add(new Animation(Condition.TRUE, 830, clearing,
+				new Timeout(harvestingFailed, 3000)));
+		harvesting.add(new Animation(Condition.TRUE, 2282, processProducts, new Timeout(
 				harvestingFailed, 3000)));
-		harvesting.add(new Animation(Condition.TRUE, 2282, state, new Timeout(
-				harvestingFailed, 3000)));
-		
+
 		harvestingFailed.add(new Notification(Condition.TRUE, state,
 				"Harvesting failed"));
 
 		// Plant a seed
-		State planting = new State();
-		State plantingFailed = new State();
+		State planting = new State("PLANT");
+		State plantingFailed = new State("PLANTF");
 		State plantedPre = new State();
-		State planted = new State();
+		State planted = new State("PLANTED");
 		state.add(new UseItemWithSceneObject(new Condition() {
 			public boolean validate() {
 				return patch.isEmpty() && patch.countWeeds() == 0;
@@ -136,8 +195,9 @@ public class DoPatches extends Module {
 		});
 
 		// Water patch
-		State watering = new State();
-		State wateringFailed = new State();
+
+		State watering = new State("WATER");
+		State wateringFailed = new State("WATERF");
 		planted.add(new UseItemWithSceneObject(new Condition() {
 			public boolean validate() {
 				return patch.canWater() && !patch.isWatered();
@@ -149,9 +209,12 @@ public class DoPatches extends Module {
 				"Watering failed"));
 
 		// Composting patch and return to 'state'
-		State composting = new State();
-		State compostingFailed = new State();
-		State composted = new State();
+		planted.add(new InteractItem(Condition.TRUE, planted,
+				Constants.MudBattleStaff, "Wield"));
+		State compostCasted = new State("COMPC");
+		State composting = new State("COMP");
+		State compostingFailed = new State("COMPF");
+		State composted = new State("COMPED");
 		planted.add(new UseItemWithSceneObject(new Condition() {
 			public boolean validate() {
 				return !patch.compost;
@@ -162,10 +225,16 @@ public class DoPatches extends Module {
 				return !patch.compost;
 			}
 		}, composting, 6032, sceneObject));
+		planted.add(new MagicCast(new Condition() {
+			public boolean validate() {
+				return !patch.compost;
+			}
+		}, compostCasted, state, Magic.Lunar.FertileSoil));
+
 		composting.add(new Animation(Condition.TRUE, 4413, composted,
-				new Timeout(compostingFailed, 3000)));
+				new Timeout(compostingFailed, 8000)));
 		composting.add(new Animation(Condition.TRUE, 2283, composted,
-				new Timeout(compostingFailed, 3000)));
+				new Timeout(compostingFailed, 8000)));
 		composted.add(new Task(Condition.TRUE, state) {
 			public void run() {
 				patch.compost = true;
@@ -173,7 +242,30 @@ public class DoPatches extends Module {
 		});
 		compostingFailed.add(new Notification(Condition.TRUE, state,
 				"Composting failed"));
+		compostCasted.add(new InteractSceneObject(Condition.TRUE, composting,
+				sceneObject, "Cast", true));
+		
+		processProducts.add(new Task(Condition.TRUE,state) {
+			public void run() {
+				for (Product product : Product.products.values()) {
+					if (product.selectedProcessOption != null) {
+						product.selectedProcessOption.run(product);
+					}
+				}
+			}
+		});
+		
+		
+		
+		System.out.println("*** " + patch.getLocation().toString() + "->"
+				+ patch.toString() + ":" + state.id);
+		System.out.println("Raking:" + raking.id + ", Curing:" + curing.id);
+		System.out.println("Clearing:" + clearing.id + ",Harvesting: "
+				+ harvesting.id);
+		System.out.println("Planting: " + planting.id + ",Composting:"
+				+ composting.id);
 
 		return state;
 	}
+
 }

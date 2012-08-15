@@ -17,7 +17,7 @@ import scripts.farming.Magic;
 import scripts.farming.ScriptWrapper;
 
 
-@ScriptWrapper
+@ScriptWrapper(banking = false)
 public class LividWrapper {
 
 	private static doLivid instance = null;
@@ -48,7 +48,7 @@ public class LividWrapper {
 		//doLivid.RUN_TIME.reset();
 	}
 
-	public static boolean cleanup() {
+	public static void cleanup() {
 		/* Destroy items so we have more space for herbs/.. */
 		Item item = Inventory.getItem(Constants.LIVID_PLANT_SINGLE);
 		if(item != null) {
@@ -86,7 +86,6 @@ public class LividWrapper {
 		}
 		Camera.setPitch(89);
 		Time.sleep(1300);
-		return false;
 	}
 
 

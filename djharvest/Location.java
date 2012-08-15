@@ -81,7 +81,7 @@ public class Location {
 	}
 
 	public String name;
-	Area area;
+	public Area area;
 
 	public Area getArea() {
 		return area;

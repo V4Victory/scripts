@@ -58,7 +58,7 @@ import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
 import org.powerbot.game.bot.event.listener.PaintListener;
 
-@Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
+@Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming", hidden = true)
 public class DJHarvest extends ActiveScript implements PaintListener {
 	boolean setupGUI = false,setup = false;
 	Timer timer;

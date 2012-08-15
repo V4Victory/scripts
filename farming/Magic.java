@@ -68,6 +68,10 @@ public class Magic {
 		
 	}
 	
+	public static Spellbook getCurrentSpellbook() {
+		return Spellbook.Lunar;
+	}
+	
 	public static void cast(int id) {
 		Tabs.MAGIC.open();
 		WidgetChild spell = Widgets.get(430,id);

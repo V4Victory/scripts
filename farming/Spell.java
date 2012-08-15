@@ -1,6 +1,9 @@
 package scripts.farming;
 
+import org.powerbot.game.api.methods.tab.Skills;
+
 import scripts.farming.Magic.Spellbook;
+import state.Condition;
 
 public class Spell {
 	String name;
@@ -17,4 +20,17 @@ public class Spell {
 	public int getWidgetId() { return widget; }
 	public Spellbook getSpellbook() { return book; }
 	public int getMagicLevel() { return magiclvl; }
+	
+	public Condition getCondition() {
+		return new Condition() {
+			@Override
+			public boolean validate() {
+				return Skills.getLevel(Skills.MAGIC) >= magiclvl && Magic.getCurrentSpellbook() == book;
+			}
+		};
+	}
+	
+	public int getAnimation() {
+		return 0;
+	}
 }

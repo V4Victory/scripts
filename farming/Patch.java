@@ -67,7 +67,7 @@ public class Patch {
 			} else if(getState()>=0xcc && getState()<=0xd7) {
 				return getState() >= 0xd2 && getState() <= 0xd4;
 			} else {
-				return (getState() & 0x80) == 0x80;
+				return (getState() & 0x80) == 0x80 && !isDead();
 			}
 		} else if(getType() == Patches.Tree) {
 			return (getState() & 0xc0) == 0x40;
@@ -92,11 +92,6 @@ public class Patch {
 			}
 		}
 		return null;
-	}
-	
-	// patch collection = all patches of a given type
-	public Patch(int type_) {
-		setType(type_);
 	}
 	
 	public Patch(int id_, Location location_, int type_, int setting_, int shift_) {
