@@ -34,6 +34,8 @@ public class CatherbyLoadstone extends Module{
 	
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
 				Magic.Lunar.HomeTeleport));
+		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
+				Magic.Standard.HomeTeleport));
 		CASTED.add(new Task(new Condition() {
 			public boolean validate() {
 				return Widgets.get(1092, 43).isOnScreen();

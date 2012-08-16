@@ -28,6 +28,6 @@ public class InteractItem extends Task {
 		Item item = Inventory.getItem(id);
 		if (item != null)
 			item.getWidgetChild().interact(interaction);
-		Time.sleep(1300);
+		Time.sleep(700);
 	}
 }

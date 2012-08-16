@@ -17,7 +17,8 @@ public class MagicCast extends Edge {
 	public MagicCast(Condition c, State s, State f, final Spell spell_) {
 		super(c.and(new Condition() {
 			public boolean validate() {
-				return Skills.getLevel(Skills.MAGIC) >= spell_.getMagicLevel();
+				return Skills.getLevel(Skills.MAGIC) >= spell_.getMagicLevel()
+						&& Magic.getCurrentSpellbook() == spell_.getSpellbook();
 			}
 		}), new State());
 		state.add(new Equip(Condition.TRUE, state, Constants.MudBattleStaff,

@@ -28,13 +28,15 @@ public class LunarBank extends Module {
 
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
 				Magic.Lunar.HomeTeleport));
+		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
+				Magic.Standard.HomeTeleport));
 		CASTED.add(new Task(new Condition() {
 			public boolean validate() {
 				return Widgets.get(1092, 39).isOnScreen();
 			}
 		}, TELEPORTING) {
 			public void run() {
-				Mouse.move(Widgets.get(1092,39).getCentralPoint());
+				Mouse.move(Widgets.get(1092, 39).getCentralPoint());
 				Widgets.get(1092, 39).click(true);
 				Time.sleep(700);
 			}

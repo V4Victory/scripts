@@ -9,8 +9,27 @@ import org.powerbot.game.api.wrappers.widget.WidgetChild;
 
 public class Magic {
 	
-	enum Spellbook{ Standard, Ancient, Lunar }; 
+	enum Spellbook{ Standard, Ancient, Lunar, UNKNOWN }; 
 	
+	public static int getSpellbookWidgetID(Spellbook book) {
+		switch(book) {
+		case Standard: return 192;
+		case Lunar: return 430;
+		default: return 0;
+		}
+	}
+	
+	public static Spellbook getCurrentSpellbook() {
+		Tabs.MAGIC.open();
+		if(Widgets.get(getSpellbookWidgetID(Spellbook.Standard),0).isOnScreen()) return Spellbook.Standard;
+		if(Widgets.get(getSpellbookWidgetID(Spellbook.Lunar),0).isOnScreen()) return Spellbook.Lunar;
+		if(Widgets.get(getSpellbookWidgetID(Spellbook.Ancient),0).isOnScreen()) return Spellbook.Ancient;
+		return Spellbook.UNKNOWN;
+	}
+	
+	public static class Standard {
+		public static final Spell HomeTeleport = new Spell("Home Teleport",24,Spellbook.Standard,0);
+	}
 	
 	public static class Lunar {
 		public static final Spell FertileSoil = new Spell("Fertile Soil",24,Spellbook.Lunar,83);
@@ -67,22 +86,19 @@ public class Magic {
 		public static final Spell BorrowedPower = new Spell("Borrowed Power",77,Spellbook.Lunar,99);
 		
 	}
-	
-	public static Spellbook getCurrentSpellbook() {
-		return Spellbook.Lunar;
-	}
+
 	
 	public static void cast(int id) {
-		Tabs.MAGIC.open();
-		WidgetChild spell = Widgets.get(430,id);
+		Spellbook book = getCurrentSpellbook();
+		WidgetChild spell = Widgets.get(getSpellbookWidgetID(book),id);
 		int y = spell.getAbsoluteY();
 		if(y<200 || y>420) {
 			int adjust = 310 - y;
-			Mouse.move(Widgets.get(430,63).getChild(1).getCentralPoint());
+			Mouse.move(Widgets.get(getSpellbookWidgetID(book),63).getChild(1).getCentralPoint());
 			Mouse.drag(Mouse.getX(),Mouse.getY()-adjust);
 			Time.sleep(1300);
 		}
-		spell = Widgets.get(430,id);
+		spell = Widgets.get(getSpellbookWidgetID(book),id);
 		spell.interact("Cast");
 	}
 	

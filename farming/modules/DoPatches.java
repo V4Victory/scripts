@@ -60,8 +60,8 @@ public class DoPatches extends Module {
 	public DoPatches(Location loc, State initial, State success, State critical) {
 		super("Do Patches", initial, success, critical, new Requirement[] {
 				DoPatches.getSeedRequirements(loc),
-				new Requirement(0, Constants.AstralRune),
-				new Requirement(0, Constants.NatureRune),
+				new Requirement(0, Constants.AstralRune,true),
+				new Requirement(0, Constants.NatureRune,true),
 				new Requirement(1,
 						locationNeedsWater(loc) ? Constants.MagicWaterCan : 0,
 						true),
@@ -240,6 +240,7 @@ public class DoPatches extends Module {
 				return !patch.compost;
 			}
 		}, compostCasted, state, Magic.Lunar.FertileSoil));
+		planted.add(new Edge(Condition.TRUE,state));
 
 		composting.add(new Animation(Condition.TRUE, 4413, composted,
 				new Timeout(compostingFailed, 8000)));

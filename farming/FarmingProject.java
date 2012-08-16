@@ -177,7 +177,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 			System.out.println("Start GUI...");
 			gui = new GUI(new File(Environment.getStorageDirectory(),
-					"farming-settings.ini"), loader);
+					Players.getLocal().getName()+"-farming-settings.ini"), loader);
 
 		} catch (Exception e) {
 			e.printStackTrace();
