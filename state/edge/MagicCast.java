@@ -10,7 +10,7 @@ import scripts.state.Condition;
 import scripts.state.State;
 import scripts.state.edge.Task;
 
-public class MagicCast extends Equip {
+public class MagicCast extends Edge {
 
 	Spell spell;
 
@@ -19,9 +19,9 @@ public class MagicCast extends Equip {
 			public boolean validate() {
 				return Skills.getLevel(Skills.MAGIC) >= spell_.getMagicLevel();
 			}
-		}), null, Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(f,
-				3000));
-		State state = new State();
+		}), new State());
+		state.add(new Equip(Condition.TRUE, state, Constants.MudBattleStaff,
+				Equipment.WEAPON, new Timeout(f, 3000)));
 		State casted = new State();
 		state.add(new Task(Condition.TRUE, casted) {
 			public void run() {

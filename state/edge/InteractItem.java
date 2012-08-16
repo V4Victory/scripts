@@ -8,12 +8,16 @@ import scripts.state.Condition;
 import scripts.state.State;
 
 public class InteractItem extends Task {
-	
+
 	int id;
 	String interaction;
-	
+
 	public InteractItem(Condition c, State s, final int id_, String interaction_) {
-		super(c, s);
+		super(c.and(new Condition() {
+			public boolean validate() {
+				return Inventory.getCount(id_) > 0;
+			}
+		}), s);
 		id = id_;
 		interaction = interaction_;
 	}
@@ -24,6 +28,6 @@ public class InteractItem extends Task {
 		Item item = Inventory.getItem(id);
 		if (item != null)
 			item.getWidgetChild().interact(interaction);
-		Time.sleep(700);
+		Time.sleep(1300);
 	}
 }

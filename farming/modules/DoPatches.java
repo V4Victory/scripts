@@ -160,7 +160,7 @@ public class DoPatches extends Module {
 		// check if you should wear secateurs
 		preharvesting.add(new Equip(new Condition() {
 			public boolean validate() {
-				return patch.useSecateurs() && Equipment.WEAPON.getEquipped() != Constants.MagicSecateurs;
+				return patch.useSecateurs();
 			}
 		}, preharvesting, Constants.MagicSecateurs, Equipment.WEAPON,
 				new Timeout(preharvesting, 5000)));
