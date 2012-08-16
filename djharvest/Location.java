@@ -214,11 +214,11 @@ public class Location {
 							new PathNode(new Tile(3603, 3527, 0)) });
 					Item vial = Inventory.getItem(4251);
 					Walking.walk(Players.getLocal().getLocation());
-					DJHarvest.waitFor(new Condition() { public boolean validate() { return !Players.getLocal().isMoving(); }});
+					DJHarvestxxx.waitFor(new Condition() { public boolean validate() { return !Players.getLocal().isMoving(); }});
 					if (vial != null)
 						vial.getWidgetChild().interact("Empty");
 					Time.sleep(700);
-					DJHarvest.waitFor(new Condition() { public boolean validate() { return Inventory.getCount(4251)>0; }});
+					DJHarvestxxx.waitFor(new Condition() { public boolean validate() { return Inventory.getCount(4251)>0; }});
 					path.traverse();
 					
 				}

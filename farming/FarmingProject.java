@@ -25,7 +25,7 @@ import scripts.state.edge.Edge;
 import scripts.state.edge.Timeout;
 import scripts.state.tools.OptionSelector;
 
-@Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming")
+@Manifest(name = "FarmingProject", authors = "djabby", version = 1.00, description = "does farming")
 public class FarmingProject extends ActiveScript implements PaintListener {
 
 	Timer timer = new Timer(0);

@@ -58,8 +58,8 @@ import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
 import org.powerbot.game.bot.event.listener.PaintListener;
 
-@Manifest(name = "DJHarvest", authors = "djabby", version = 1.00, description = "does farming", hidden = true)
-public class DJHarvest extends ActiveScript implements PaintListener {
+//@Manifest(name = "DJHarvestxxx", authors = "djabby", version = 1.00, description = "does farming", hidden = true)
+public class DJHarvestxxx extends ActiveScript implements PaintListener {
 	boolean setupGUI = false,setup = false;
 	Timer timer;
 	public File settingsPath;
@@ -371,7 +371,7 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 			try {
 				for (int i = 0; i < Patches.COUNT_TYPES; i++)
 					patchTypes.addItem(Patches.getTypeName(i));
-				final List<Class<?>> classes = DJHarvest.getClassesForPackage("");
+				final List<Class<?>> classes = DJHarvestxxx.getClassesForPackage("");
 				final Set<Class<?>> subTypes = new HashSet<Class<?>>();
 				for(Class<?> clazz : classes) {
 					if(clazz.getAnnotation(ScriptWrapper.class) != null) {
@@ -676,7 +676,7 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 
 					contextField.setAccessible(true);
 					Context context = (Context) contextField
-							.get(DJHarvest.this);
+							.get(DJHarvestxxx.this);
 					Field botField = Context.class.getDeclaredField("bot");
 					botField.setAccessible(true);
 					Bot bot = (Bot) botField.get(context);
@@ -717,7 +717,7 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 						tasksField.setAccessible(true);
 						final Task[] tasks = (Task[]) tasksField.get(strategy);
 						Strategy newStrategy;
-						DJHarvest.this.provide(newStrategy = new Strategy(
+						DJHarvestxxx.this.provide(newStrategy = new Strategy(
 								new DelegateCondition(condition) {
 									@Override
 									public boolean customValidate() {
@@ -729,7 +729,7 @@ public class DJHarvest extends ActiveScript implements PaintListener {
 				} else {
 					System.out.println("Cleanup wrapper");
 					for (Strategy strategy : newStrategies) {
-						DJHarvest.this.revoke(strategy);
+						DJHarvestxxx.this.revoke(strategy);
 					}
 					if((boolean)alternateScript.getDeclaredMethod("cleanup").invoke(null))
 						setup = false;
