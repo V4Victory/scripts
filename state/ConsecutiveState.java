@@ -2,17 +2,46 @@ package scripts.state;
 
 import java.util.Collection;
 
-import scripts.state.edge.Edge;
-import scripts.state.edge.Task;
+import scripts.state.edge.Either;
+import scripts.state.edge.ValuedEither;
+import scripts.state.tools.Cons;
 
 public class ConsecutiveState<T> extends State {
 	private static <T> State init(T[] values, State finalState,
 			StateCreator<T> stateCreator) {
 		State currentState = finalState;
+		System.out.println("Count values: " + values.length);
 		for (int i = values.length - 1; i >= 0; i--) {
 			currentState = stateCreator.getState(values[i], currentState);
 		}
 		return currentState;
+	}
+
+	private static <T> State init(final Value<Cons<T>> values,
+			final State finalState, final StateCreator<T> stateCreator) {
+		State first = new State();
+		first.add(new ValuedEither<Cons<T>>(Condition.TRUE, values) {
+			public boolean validateValue(Cons<T> val) {
+				return val.isEmpty();
+			}
+
+			public State getFirstState(Cons<T> val) {
+				return finalState;
+			}
+
+			public State getSecondState(final Cons<T> val) {
+				return stateCreator.getState(val.getHead(),
+						init(new Value<Cons<T>>() {
+							public Cons<T> get() {
+								return val.getTail();
+							}
+						}, finalState, stateCreator));
+			}
+		}
+
+		);
+
+		return first;
 	}
 
 	public ConsecutiveState(T[] values, State finalState,
@@ -27,12 +56,10 @@ public class ConsecutiveState<T> extends State {
 
 	public ConsecutiveState(final Value<? extends Collection<T>> values,
 			final State finalState, final StateCreator<T> stateCreator) {
-		final State statesRemoved = new State();
-		add(new Task(Condition.TRUE, statesRemoved) {
-			public void run() {
-				statesRemoved.removeAllEdges();
-				statesRemoved.add(new Edge(Condition.TRUE, init((T[])values.get().toArray(),finalState,stateCreator)));
+		super(init(new Value<Cons<T>>() {
+			public Cons<T> get() {
+				return new Cons<T>(values.get().iterator());
 			}
-		});
+		}, finalState, stateCreator));
 	}
 }

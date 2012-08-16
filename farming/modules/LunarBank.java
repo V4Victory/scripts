@@ -35,9 +35,8 @@ public class LunarBank extends Module {
 		}, TELEPORTING) {
 			public void run() {
 				Mouse.move(Widgets.get(1092,39).getCentralPoint());
+				Widgets.get(1092, 39).click(true);
 				Time.sleep(700);
-				Mouse.click(true);
-				//Widgets.get(1092, 39).click(true);
 			}
 		});
 		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,

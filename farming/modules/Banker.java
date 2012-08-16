@@ -1,14 +1,13 @@
 package scripts.farming.modules;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.widget.Bank;
+import org.powerbot.game.api.util.Time;
+import org.powerbot.game.api.wrappers.node.Item;
 
 import scripts.farming.FarmingProject;
 import scripts.farming.Location;
@@ -27,15 +26,34 @@ import scripts.state.tools.OptionSelector;
 
 public class Banker extends SharedModule {
 	// id -> amount
-	public Map<Integer, Integer> getRequirements(FarmingProject main) {
-		Map<Integer, Integer> items = new HashMap<Integer, Integer>();
+	public List<Requirement> getRequirements(FarmingProject main) {
+		List<Requirement> items = new ArrayList<Requirement>();
 		List<Module> modules = new ArrayList<Module>();
 		modules.add(main.MODULE_RUN_SCRIPT);
+		modules.add(this);
 		for (Location location : Location.locations) {
 			if (location.activated) {
 				modules.add(location.getModule());
 				modules.add(location.selectedTeleportOption);
 			}
+		}
+		for (Module m : modules) {
+			for (Requirement r : m.getRequirements()) {
+				Requirement and_req;
+				do {
+					and_req = r.and_req;
+					r.and_req = null;
+					items.add(r);
+				} while ((r = and_req) != null);
+			}
+		}
+		/*
+		 * System.out.println("All Requirements:"); for (Requirement req :
+		 * items) { System.out.println(req.id.get() + "->" + req.amount); }
+		 */
+		System.out.println("Total requirements: " + items.size());
+		for(Requirement item : items) {
+			System.out.println(">" + item);
 		}
 		return items;
 	}
@@ -43,8 +61,6 @@ public class Banker extends SharedModule {
 	public enum Method {
 		IDLE, DEPOSIT, WITHDRAW
 	};
-
-	public Method method = Method.IDLE;
 
 	public Banker(final FarmingProject main, State initial, State success,
 			State critical) {
@@ -57,6 +73,11 @@ public class Banker extends SharedModule {
 						return (Module) Location.getLocation("Bank").selectedTeleportOption;
 					}
 				});
+		initial.add(new Edge(new Condition() {
+			public boolean validate() {
+				return Bank.open();
+			}
+		}, AT_BANK));
 		initial.add(chooseTeleport);
 		initial.add(new Timeout(critical, 15000));
 
@@ -71,32 +92,41 @@ public class Banker extends SharedModule {
 		State BANK_OPEN = new State("BANKO");
 		State DEPOSIT = new State("BANKD");
 
-		State WITHDRAW = new ConsecutiveState<Entry<Integer, Integer>>(
-				new Value<Set<Entry<Integer, Integer>>>() {
-					public Set<Entry<Integer, Integer>> get() {
-						return getRequirements(main).entrySet();
+		State WITHDRAW = new ConsecutiveState<Requirement>(
+				new Value<List<Requirement>>() {
+					public List<Requirement> get() {
+						return getRequirements(main);
 					}
-				}, BANKING_FINISHED,
-				new StateCreator<Entry<Integer, Integer>>() {
-					public State getState(Entry<Integer, Integer> value,
-							State nextState) {
-						final Integer id = value.getKey();
-						final Integer amount = value.getValue();
-						if (id == 0)
-							return nextState;
+				}, BANKING_FINISHED, new StateCreator<Requirement>() {
+					public State getState(Requirement value, State nextState) {
 						State state = new State();
-						state.add(new Edge(new Condition() {
-							public boolean validate() {
-								return Inventory.getCount() > (amount == 0 ? 0
-										: amount - 1);
-							}
-						}, nextState));
-						state.add(new Task(Condition.TRUE, state) {
-							public void run() {
-								Bank.setWithdrawNoted(amount == 0);
-								Bank.withdraw(id, amount);
-							}
-						});
+						int i = 0;
+						do {
+							final Integer id = value.id.get();
+							final Integer amount = value.amount;
+							if (id > 0) {
+								i++;
+								state.add(new Edge(new Condition() {
+									public boolean validate() {
+										return Inventory.getCount(id) > (amount == 0 ? 0
+												: amount - 1);
+									}
+								}, nextState));
+								state.add(new Task(new Condition() {
+									public boolean validate() {
+										return Bank.getItem(id) != null;
+									}
+								}, state) {
+									public void run() {
+										Bank.withdraw(id, amount);
+										Time.sleep(300);
+									}
+								});
+							}					
+						} while ((value = value.or_req) != null);
+
+						if (i == 0)
+							state.add(new Edge(Condition.TRUE,nextState));
 						return state;
 					}
 				});
@@ -109,19 +139,19 @@ public class Banker extends SharedModule {
 
 		BANK_OPEN.add(new Edge(new Condition() {
 			public boolean validate() {
-				return Banker.this.method == Method.DEPOSIT;
+				return Banker.this.intermediateValue == Method.DEPOSIT;
 			}
 		}, DEPOSIT));
 
 		BANK_OPEN.add(new Edge(new Condition() {
 			public boolean validate() {
-				return Banker.this.method == Method.WITHDRAW;
+				return Banker.this.intermediateValue == Method.WITHDRAW;
 			}
 		}, WITHDRAW));
 
 		BANK_OPEN.add(new Edge(new Condition() {
 			public boolean validate() {
-				return Banker.this.method == Method.IDLE;
+				return Banker.this.intermediateValue == Method.IDLE;
 			}
 		}, BANKING_FINISHED));
 
@@ -133,6 +163,7 @@ public class Banker extends SharedModule {
 
 		DEPOSIT.add(new Task(Condition.TRUE, DEPOSIT) {
 			public void run() {
+				Bank.depositEquipment();
 				Bank.depositInventory();
 			}
 		});

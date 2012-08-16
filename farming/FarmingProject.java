@@ -37,6 +37,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 	State ON_CHOOSE_LOCATION;
 	State LOAD_GUI;
+	State BANK_INIT_DEPOSIT;
+	State BANK_INIT_WITHDRAW;
 
 	public ScriptLoader loader;
 	public Banker banker;
@@ -47,10 +49,13 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 			System.out.println("Initialize...");
 
 			loader = new ScriptLoader();
+			
 			INITIAL = new State("I");
 			CRITICAL_FAIL = new State("C");
 			ON_CHOOSE_LOCATION = new State("O");
 			LOAD_GUI = new State("G");
+			BANK_INIT_DEPOSIT = new State("BID");
+			BANK_INIT_WITHDRAW = new State("BIW");
 			banker = new Banker(this, new State("BI"), new State("BS"),
 					CRITICAL_FAIL);
 
@@ -58,8 +63,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 			INITIAL.add(new Edge(new Condition() {
 				public boolean validate() {
-					System.out.println("Total work = " + Patches.countAllWork());
-					return Patches.countAllWork() > 0;
+					System.out.println("Total work = " + Patches.countAllWork(false));
+					return Patches.countAllWork(false) > 0;
 				}
 			}, ON_CHOOSE_LOCATION));
 
@@ -126,7 +131,10 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				public boolean validate() {
 					return gui.isDone();
 				}
-			}, INITIAL));
+			}, BANK_INIT_DEPOSIT));
+			
+			banker.addSharedStates(BANK_INIT_DEPOSIT, BANK_INIT_WITHDRAW, Banker.Method.DEPOSIT, Banker.Method.IDLE);
+			banker.addSharedStates(BANK_INIT_WITHDRAW, INITIAL, Banker.Method.WITHDRAW, Banker.Method.IDLE);
 
 			System.out.println("Setup alternative script...");
 
@@ -137,12 +145,12 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 						}
 					}, new Condition() {
 						public boolean validate() {
-							return Patches.countAllWork() == 0
+							return Patches.countAllWork(false) == 0
 									&& gui.scriptsEnabled;
 						}
 					}, new Condition() {
 						public boolean validate() {
-							return Patches.countAllWork() > 9;
+							return Patches.countAllWork(true) > 9;
 						}
 					});
 
@@ -223,7 +231,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 		g.setColor(Color.YELLOW);
 		g.fillRect(5, 5, 110, 30);
 		g.setColor(Color.BLACK);
-		g.drawString("Farming work: " + Patches.countAllWork(), 7, 18);
+		g.drawString("Farming work: " + Patches.countAllWork(true), 7, 18);
 		g.drawString("Time: " + timer.toElapsedString(), 7, 33);
 
 	}

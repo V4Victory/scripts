@@ -65,6 +65,7 @@ public class Cockatrice extends ActiveScript implements PaintListener {
 		}
 
 		public boolean validate() {
+			System.out.println("validate");
 			return Inventory.getCount(1944) == 0;
 		}
 

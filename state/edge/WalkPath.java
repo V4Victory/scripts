@@ -17,7 +17,7 @@ public class WalkPath extends Edge {
 				.add(new Edge(new Condition() {
 					public boolean validate() {
 						Walking.walk(tile);
-						return Players.getLocal().getLocation().distance(tile) <= 5;
+						return Players.getLocal().getLocation().distance(tile) <= 6;
 					}}, nextState))
 				.add(timeout);
 			}

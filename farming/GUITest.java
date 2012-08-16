@@ -2,17 +2,12 @@ package scripts.farming;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.security.Permission;
 
 import org.powerbot.game.api.ActiveScript;
-import org.powerbot.game.api.methods.Environment;
 
-import scripts.farming.modules.RunOtherScript;
-
-import scripts.state.*;
+import scripts.farming.modules.DoPatches;
 
 public class GUITest {
 
@@ -139,7 +134,7 @@ public class GUITest {
 		final GUI gui;
 		ScriptLoader loader = new ScriptLoader();
 		gui = new GUI(new File("farming-settings.ini"), loader);
-
+		System.out.println(DoPatches.getSeedRequirements(Location.getLocation("Falador")));
 	}
 
 }

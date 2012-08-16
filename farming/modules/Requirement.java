@@ -1,12 +1,9 @@
 package scripts.farming.modules;
 
-import org.powerbot.game.api.methods.tab.Inventory;
-
-import scripts.state.Condition;
 import scripts.state.Constant;
 import scripts.state.Value;
 
-public class Requirement extends Condition {
+public class Requirement {
 	public int amount;
 	public Value<Integer> id;
 	
@@ -38,13 +35,14 @@ public class Requirement extends Condition {
 			return and_req.and(other);
 		}
 	}
+
 	
-	public boolean validate() {
-		if(id.get() == 0 || Inventory.getCount(id.get()) >= Math.max(1, amount)) {
-			return and_req != null ? and_req.validate() : true;
-		} else if(or_req != null && or_req.validate()) {
-			return true;
-		}
-		return false;
+	public String toString() {
+		String s = "";
+		if(or_req != null) s += "(";
+		s += id.get()+","+amount;
+		if(or_req != null) s += "|"+or_req + ")";
+		if(and_req != null) s+= "&"+and_req;
+		return s;
 	}
 }

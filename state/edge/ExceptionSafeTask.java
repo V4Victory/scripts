@@ -12,13 +12,12 @@ public abstract class ExceptionSafeTask extends Either {
 					ExceptionSafeTask.this.run();
 					return true;
 				} catch(Exception e) {
+					System.out.println("Exception:" + e.getMessage());
 					e.printStackTrace();
 					return false;
 				}
 			}
 		}));
-
-		setState(s);
 	}
 
 	public abstract void run() throws Exception;

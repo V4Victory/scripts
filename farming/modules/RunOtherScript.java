@@ -9,6 +9,7 @@ import java.util.Set;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.concurrent.strategy.StrategyDaemon;
 import org.powerbot.game.api.ActiveScript;
+import org.powerbot.game.api.util.Time;
 import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
 
@@ -17,14 +18,20 @@ import scripts.farming.ScriptWrapper;
 import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
+import scripts.state.edge.Edge;
+import scripts.state.edge.Either;
 import scripts.state.edge.ExceptionSafeTask;
 import scripts.state.edge.Option;
+import scripts.state.edge.Task;
 import scripts.state.tools.OptionSelector;
 
 public class RunOtherScript extends Module {
 	List<Strategy> newStrategies;
 	public Class<?> runningScript = null;
 	public ActiveScript activeScript;
+	
+	
+	
 
 	public RunOtherScript(final FarmingProject main, State initial, State success,
 			State critical, OptionSelector<Class<?>> selector,
@@ -44,9 +51,11 @@ public class RunOtherScript extends Module {
 					.getAnnotation(ScriptWrapper.class);
 			if(annotation.banking()) {
 				option.add(script,bankFirst);
-				main.banker.addSharedStates(bankFirst, prepared);
+				main.banker.addSharedStates(bankFirst, prepared, Banker.Method.DEPOSIT, Banker.Method.IDLE);
+				main.banker.addSharedStates(cleaningUp, success, Banker.Method.WITHDRAW, Banker.Method.IDLE);
 			} else {
 				option.add(script, prepared);
+				cleaningUp.add(new Edge(Condition.TRUE,success));
 			}
 
 			
@@ -82,12 +91,12 @@ public class RunOtherScript extends Module {
 					newStrategies = new ArrayList<Strategy>();
 
 					for (Strategy strategy : strategies) {
-
+						/*System.out.println(strategy.getClass().getName());
 						Field policyField = Strategy.class
 								.getDeclaredField("policy");
 						policyField.setAccessible(true);
 						final org.powerbot.concurrent.strategy.Condition condition = (org.powerbot.concurrent.strategy.Condition) policyField
-								.get(strategy);
+								.get(strategy);*/
 						Field tasksField = Strategy.class
 								.getDeclaredField("tasks");
 						tasksField.setAccessible(true);
@@ -96,18 +105,26 @@ public class RunOtherScript extends Module {
 						Strategy newStrategy;
 
 						main.customProvide(newStrategy = new Strategy(
-								(Condition) run.and(condition), tasks));
+								(Condition) run.and(interrupt.negate()).and(strategy), tasks));
 						newStrategies.add(newStrategy);
 					}
 
 				}
 			});
-			state.add(new ExceptionSafeTask(interrupt, success, critical) {
+			State checkInterrupt = new State();
+			State interrupted = new State();
+			state.add(new Task(Condition.TRUE,checkInterrupt) {
+				public void run() {
+					Time.sleep(10000);
+				}
+			});
+			checkInterrupt.add(new Either(interrupt,interrupted,state));
+			interrupted.add(new ExceptionSafeTask(Condition.TRUE, cleaningUp, critical) {
 				public void run() throws Exception {
 					for (Strategy strategy : newStrategies) {
 						main.customRevoke(strategy);
 					}
-					runningScript.getDeclaredMethod("cleanup").invoke(null);
+					script.getDeclaredMethod("cleanup").invoke(null);
 					activeScript = null;
 				}
 			});

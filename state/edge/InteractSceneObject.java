@@ -45,9 +45,10 @@ public class InteractSceneObject extends Task {
 		if(!Menu.isOpen()) {
 			Time.sleep(100);
 			Mouse.click(false);
+			Time.sleep(300);
 		}
 		if(!Menu.select(interaction)) {
-			Time.sleep(100);
+			Time.sleep(300);
 			object.get().getModel().interact(interaction);	
 		}
 	}

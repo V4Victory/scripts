@@ -1,6 +1,8 @@
 package scripts.farming.modules;
 
 import org.powerbot.game.api.methods.Widgets;
+import org.powerbot.game.api.methods.input.Mouse;
+import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.Tile;
 
 import scripts.farming.Magic;
@@ -43,7 +45,6 @@ public class FaladorLoadstone extends Module{
 				,new Tile(3015,3324,0)
 				,new Tile(3022,3323,0)
 				,new Tile(3030,3323,0)
-				,new Tile(3076,3314,0)
 				,new Tile(3036,3322,0)
 				,new Tile(3042,3318,0)
 				,new Tile(3049,3320,0)
@@ -59,7 +60,9 @@ public class FaladorLoadstone extends Module{
 			}
 		}, TELEPORTING) {
 			public void run() {
+				Mouse.move(Widgets.get(1092,46).getCentralPoint());
 				Widgets.get(1092, 46).click(true);
+				Time.sleep(700);
 			}
 		});
 		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,

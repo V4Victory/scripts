@@ -10,6 +10,7 @@ public class Constants {
 	public final static int AstralRune = 9075;
 	public final static int TrollheimTablet = 112; 
 	public final static int ExplorersRing3 = 13562; 
-	public final static int ExplorersRing4 = 19760; 
+	public final static int ExplorersRing4 = 19760;
+	public static final int MagicWaterCan = 18682; 
 	
 }

@@ -45,10 +45,10 @@ public class Patches {
 		}
 	}
 	
-	public static Integer countAllWork() {
+	public static Integer countAllWork(boolean diseasedToo) {
 		Integer count = 0;
 		for(Patch patch : patches.values()) {
-			if(patch.activated && (patch.isDead() || patch.isDiseased() || patch.getProgress() == 1.0
+			if(patch.activated && (patch.isDead() || (diseasedToo && patch.isDiseased()) || patch.getProgress() == 1.0
 					|| patch.isEmpty())) count += getTypeRating(patch.getType());
 		}
 		return count;

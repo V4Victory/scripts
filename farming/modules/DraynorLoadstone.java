@@ -1,6 +1,8 @@
 package scripts.farming.modules;
 
 import org.powerbot.game.api.methods.Widgets;
+import org.powerbot.game.api.methods.input.Mouse;
+import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.Tile;
 
 import scripts.farming.Magic;
@@ -46,7 +48,9 @@ public class DraynorLoadstone extends Module{
 			}
 		}, TELEPORTING) {
 			public void run() {
-				Widgets.get(1092, 44).click(true);
+				Mouse.move(Widgets.get(1092,43).getCentralPoint());
+				Widgets.get(1092, 43).click(true);
+				Time.sleep(700);
 			}
 		});
 		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,

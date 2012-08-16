@@ -1,6 +1,8 @@
 package scripts.farming.modules;
 
 import org.powerbot.game.api.methods.Widgets;
+import org.powerbot.game.api.methods.input.Mouse;
+import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.Tile;
 
 import scripts.farming.Magic;
@@ -42,7 +44,9 @@ public class ArdougneLoadstone extends Module{
 			}
 		}, TELEPORTING) {
 			public void run() {
+				Mouse.move(Widgets.get(1092,41).getCentralPoint());
 				Widgets.get(1092, 41).click(true);
+				Time.sleep(700);
 			}
 		});
 		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
