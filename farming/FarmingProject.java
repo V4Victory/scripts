@@ -3,15 +3,25 @@ package scripts.farming;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.io.File;
 import java.util.Map.Entry;
 
+import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
 import org.powerbot.game.api.methods.Environment;
+import org.powerbot.game.api.methods.Tabs;
+import org.powerbot.game.api.methods.Widgets;
+import org.powerbot.game.api.methods.input.Mouse;
 import org.powerbot.game.api.methods.interactive.Players;
+import org.powerbot.game.api.methods.tab.Skills;
+import org.powerbot.game.api.methods.widget.Camera;
+import org.powerbot.game.api.util.Random;
+import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.util.Timer;
+import org.powerbot.game.api.wrappers.widget.WidgetChild;
 import org.powerbot.game.bot.event.listener.PaintListener;
 
 import scripts.farming.modules.Banker;
@@ -61,7 +71,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 					CRITICAL_FAIL);
 
 			provide(new StateStrategy(LOAD_GUI, Condition.TRUE));
-
+			provide(new Antiban());
+			
 			INITIAL.add(new Edge(new Condition() {
 				public boolean validate() {
 					System.out.println("Total work = "
@@ -78,13 +89,12 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 							Integer mostWorkCount = 0;
 							// select the location with the most work to do
 							for (Location location : Location.locations) {
-								if (location.isBank())
+								if (location.isBank() || !location.checkRequirements())
 									continue;
 								if (location.area.contains(Players.getLocal())
 										&& location.countWork(true) > 0) {
-									System.out.println("Let's stay in "
-											+ location.name);
-									return location;
+									loc = location;
+									break;
 								}
 
 								if (location.activated
@@ -132,6 +142,13 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 			LOAD_GUI.add(new Edge(new Condition() {
 				public boolean validate() {
 					return gui.isDone();
+				}
+			}, INITIAL));
+			
+			/** When there is no location that we can visit with our current items, go to bank **/
+			INITIAL.add(new Edge(new Condition() {
+				public boolean validate() {
+					return false;
 				}
 			}, BANK_INIT_DEPOSIT));
 
@@ -256,6 +273,41 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 	public void customRevoke(Strategy s) {
 		revoke(s);
+	}
+
+	public class Antiban extends Strategy implements Task {
+		Timer timer = new Timer(Random.nextInt(30000, 40000));
+
+
+		public void run() {
+			int action = Random.nextInt(0, 4);
+			switch (action) {
+			case 0:
+				int randomSkill = Random.nextInt(0, 24);
+                Tabs.STATS.open();
+                WidgetChild randStat = Skills.getWidgetChild(randomSkill);
+                Point randStatPoint = randStat.getAbsoluteLocation();
+                randStatPoint.x += Random.nextInt(-10, 10); //Don't have the mouse go to the EXACT same spot every time! :)
+                randStatPoint.y += Random.nextInt(-10, 10); //Also, you can change all of these values. >_>
+                Mouse.move(randStatPoint);
+                break;
+			default:
+				int currentPitch = Camera.getPitch();
+				int currentYaw = Camera.getYaw();
+				Camera.setPitch(currentPitch + Random.nextInt(-50, 50));
+				Camera.setAngle(currentYaw + Random.nextInt(-70, 70));
+				break;
+			}
+			if(Widgets.get(906,186).isOnScreen()) {
+				Widgets.get(906,186).click(true);
+				Time.sleep(700,3000);
+			}
+			timer.setEndIn(Random.nextInt(30000, 40000));
+		}
+
+		public boolean validate() {
+			return !timer.isRunning();
+		}
 	}
 
 }

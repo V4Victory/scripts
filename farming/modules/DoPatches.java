@@ -58,26 +58,19 @@ public class DoPatches extends Module {
 	}
 
 	public DoPatches(Location loc, State initial, State success, State critical) {
-		super(
-				"Do Patches",
-				initial,
-				success,
-				critical,
-				new Requirement[] {
-						DoPatches.getSeedRequirements(loc),
-						new Requirement(0, Constants.AstralRune),
-						new Requirement(0, Constants.NatureRune),
-						new Requirement(
-								1,
-								locationNeedsWater(loc) ? Constants.MagicWaterCan
-										: 0),
-						new Requirement(
-								1,
-								locationNeedsSecateurs(loc) ? Constants.MagicSecateurs
-										: 0),
-						new Requirement(1, Constants.MudBattleStaff)
-								.or(new Requirement(1,
-										Constants.MysticMudBattleStaff)) });
+		super("Do Patches", initial, success, critical, new Requirement[] {
+				DoPatches.getSeedRequirements(loc),
+				new Requirement(0, Constants.AstralRune),
+				new Requirement(0, Constants.NatureRune),
+				new Requirement(1,
+						locationNeedsWater(loc) ? Constants.MagicWaterCan : 0,
+						true),
+				new Requirement(1,
+						locationNeedsSecateurs(loc) ? Constants.MagicSecateurs
+								: 0, true),
+				new Requirement(1, Constants.MudBattleStaff, true)
+						.or(new Requirement(1, Constants.MysticMudBattleStaff,
+								true)) });
 
 		initial.add(new Edge(Condition.TRUE, new ConsecutiveState<Patch>(loc
 				.getPatches(), success, new StateCreator<Patch>() {
@@ -155,29 +148,25 @@ public class DoPatches extends Module {
 		clearingFailed.add(new Notification(Condition.TRUE, processProducts,
 				"Clearing failed"));
 
-		// check if you should wear secateurs
-		state.add(new Equip(new Condition() {
-			public boolean validate() {
-				return patch.useSecateurs() && patch.getProgress() >= 1.0;
-			}
-		}, state, Constants.MagicSecateurs, Equipment.WEAPON, new Timeout(
-				state, 5000)));
-
-		state.add(new Equip(new Condition() {
-			public boolean validate() {
-				return !patch.useSecateurs() || patch.isEmpty();
-			}
-		}, state, Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
-				state, 5000)));
-
 		// harvest
+		State preharvesting = new State();
 		State harvesting = new State("HARV");
 		State harvestingFailed = new State("HARVF");
-		state.add(new InteractSceneObject(new Condition() {
+		state.add(new Edge(new Condition() {
 			public boolean validate() {
 				return patch.getProgress() >= 1.0;
 			}
-		}, harvesting, sceneObject, patch.getHarvestingInteraction(), true));
+		}, preharvesting));
+		// check if you should wear secateurs
+		preharvesting.add(new Equip(new Condition() {
+			public boolean validate() {
+				return patch.useSecateurs() && Equipment.WEAPON.getEquipped() != Constants.MagicSecateurs;
+			}
+		}, preharvesting, Constants.MagicSecateurs, Equipment.WEAPON,
+				new Timeout(preharvesting, 5000)));
+		preharvesting.add(new InteractSceneObject(Condition.TRUE, harvesting,
+				sceneObject, patch.getHarvestingInteraction(), true));
+
 		harvesting.add(new Animation(Condition.TRUE, 2292, processProducts,
 				new Timeout(harvestingFailed, 10000)));
 		harvesting.add(new Animation(Condition.TRUE, 830, clearing,
@@ -231,8 +220,6 @@ public class DoPatches extends Module {
 				"Watering failed"));
 
 		// Composting patch and return to 'state'
-		state.add(new Equip(Condition.TRUE, state, Constants.MudBattleStaff,
-				Equipment.WEAPON, new Timeout(state, 5000)));
 
 		State compostCasted = new State("COMPC");
 		State composting = new State("COMP");

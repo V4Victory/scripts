@@ -47,7 +47,7 @@ public class Product {
 			Item item;
 			while((item = Inventory.getItem(p.id)) != null) {
 				item.getWidgetChild().interact("Drop");
-				Time.sleep(250);
+				Time.sleep(700);
 			}			
 		}
 	};

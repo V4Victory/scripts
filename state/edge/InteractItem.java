@@ -13,11 +13,7 @@ public class InteractItem extends Task {
 	String interaction;
 	
 	public InteractItem(Condition c, State s, final int id_, String interaction_) {
-		super(c.and(new Condition() {
-			public boolean validate() {
-				return Inventory.getCount(id_) > 0;
-			}
-		}), s);
+		super(c, s);
 		id = id_;
 		interaction = interaction_;
 	}

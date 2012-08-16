@@ -19,6 +19,7 @@ import scripts.state.State;
 import scripts.state.StateCreator;
 import scripts.state.Value;
 import scripts.state.edge.Edge;
+import scripts.state.edge.Notification;
 import scripts.state.edge.Option;
 import scripts.state.edge.Task;
 import scripts.state.edge.Timeout;
@@ -56,7 +57,7 @@ public class Banker extends SharedModule {
 	};
 
 	public Banker(final FarmingProject main, State initial, State success,
-			State critical) {
+			final State critical) {
 		super("Banker", initial, success, critical);
 
 		State AT_BANK = new State("BANK");
@@ -92,17 +93,19 @@ public class Banker extends SharedModule {
 					}
 				}, BANKING_FINISHED, new StateCreator<Requirement>() {
 					public State getState(Requirement value, State nextState) {
-						State state = new State();
+						State state = new State(value.toString());
 						int i = 0;
 						do {
 							final Integer id = value.id.get();
 							final Integer amount = value.amount;
 							if (id > 0) {
 								i++;
+								final Requirement or_req = value.or_req;
+								final Requirement val = value;
 								state.add(new Edge(new Condition() {
 									public boolean validate() {
 										return Inventory.getCount(id) > (amount == 0 ? 0
-												: amount - 1) || Bank.getItem(id) == null;
+												: amount - 1) || (or_req == null && Bank.getItem(id) == null);
 									}
 								}, nextState));
 								state.add(new Task(new Condition() {
@@ -115,6 +118,11 @@ public class Banker extends SharedModule {
 										Time.sleep(300);
 									}
 								});
+								state.add(new Notification(new Condition() {
+									public boolean validate() {
+										return !val.optional;
+									}
+								}, critical, "Having #" + id + " is mandatory"));
 							}					
 						} while ((value = value.or_req) != null);
 
@@ -163,7 +171,7 @@ public class Banker extends SharedModule {
 
 		BANKING_FINISHED.add(new Task(Condition.TRUE, success) {
 			public void run() {
-				Bank.close();
+				//Bank.close();
 			}
 		});
 

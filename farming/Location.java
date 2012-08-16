@@ -10,6 +10,7 @@ import org.powerbot.game.api.methods.interactive.Players;
 import org.powerbot.game.api.wrappers.Area;
 import org.powerbot.game.api.wrappers.Tile;
 
+import scripts.farming.modules.Requirement;
 import scripts.farming.modules.Target;
 import scripts.state.Condition;
 import scripts.state.Module;
@@ -134,4 +135,11 @@ public class Location {
 					new Tile(2816, 3458, 0))),
 			new Location("Trollheim", new Area(new Tile(2805, 3687, 0),
 					new Tile(2820, 3673, 0))) };
+
+	public boolean checkRequirements() {
+		if(module == null) return true;
+		Requirement[] reqs = module.getRequirements();
+		for(Requirement req : reqs) if(!req.validate()) return false;
+		return true;
+	}
 }
