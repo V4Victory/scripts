@@ -394,8 +394,10 @@ public class GUI extends JFrame {
 						}
 					}
 
-					if(location.selectedTeleportOption == null)
-						location.selectedTeleportOption = location.getTeleportOptions().iterator().next();
+					if(location.selectedTeleportOption == null) {
+						if(location.getTeleportOptions().size()>0)
+							location.selectedTeleportOption = location.getTeleportOptions().iterator().next();
+					}
 				}
 			//	System.out.print(".");
 			}

@@ -1,6 +1,7 @@
 package scripts.farming;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.game.api.methods.input.Mouse;
@@ -22,6 +23,7 @@ public class Product {
 	ProcessOption[] processOptions;
 	public ProcessOption[] getProcessOptions() { return processOptions; }
 	public ProcessOption selectedProcessOption;
+	public static Map<String,Integer> notedProducts = new HashMap<String,Integer>();
 	
 	public Product(int id_, String name_) {
 		this(id_,name_,Drop);
@@ -55,7 +57,9 @@ public class Product {
 		public void run(final Product p) {
 			Camera.setPitch(89);
 			final Item item = Inventory.getItem(p.id);
-			if(item == null) return;			
+			if(item == null) return;		
+			if(notedProducts.containsKey(item.getName()))
+				notedProducts.put(item.getName(), notedProducts.get(item.getName()) + Inventory.getCount(p.id));
 			final Timer timer = new Timer(2000);
 			waitFor(new Condition() { 
 				public boolean validate() {

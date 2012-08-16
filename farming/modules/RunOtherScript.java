@@ -111,14 +111,9 @@ public class RunOtherScript extends Module {
 
 				}
 			});
-			State checkInterrupt = new State();
 			State interrupted = new State();
-			state.add(new Task(Condition.TRUE,checkInterrupt) {
-				public void run() {
-					Time.sleep(10000);
-				}
-			});
-			checkInterrupt.add(new Either(interrupt,interrupted,state));
+
+			state.add(new Either(interrupt,interrupted,state));
 			interrupted.add(new ExceptionSafeTask(Condition.TRUE, cleaningUp, critical) {
 				public void run() throws Exception {
 					for (Strategy strategy : newStrategies) {

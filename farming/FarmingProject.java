@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.io.File;
+import java.util.Map.Entry;
 
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.ActiveScript;
@@ -20,8 +21,8 @@ import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
 import scripts.state.StateStrategy;
-import scripts.state.edge.Option;
 import scripts.state.edge.Edge;
+import scripts.state.edge.Option;
 import scripts.state.edge.Timeout;
 import scripts.state.tools.OptionSelector;
 
@@ -49,7 +50,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 			System.out.println("Initialize...");
 
 			loader = new ScriptLoader();
-			
+
 			INITIAL = new State("I");
 			CRITICAL_FAIL = new State("C");
 			ON_CHOOSE_LOCATION = new State("O");
@@ -63,7 +64,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 			INITIAL.add(new Edge(new Condition() {
 				public boolean validate() {
-					System.out.println("Total work = " + Patches.countAllWork(false));
+					System.out.println("Total work = "
+							+ Patches.countAllWork(false));
 					return Patches.countAllWork(false) > 0;
 				}
 			}, ON_CHOOSE_LOCATION));
@@ -132,9 +134,11 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 					return gui.isDone();
 				}
 			}, BANK_INIT_DEPOSIT));
-			
-			banker.addSharedStates(BANK_INIT_DEPOSIT, BANK_INIT_WITHDRAW, Banker.Method.DEPOSIT, Banker.Method.IDLE);
-			banker.addSharedStates(BANK_INIT_WITHDRAW, INITIAL, Banker.Method.WITHDRAW, Banker.Method.IDLE);
+
+			banker.addSharedStates(BANK_INIT_DEPOSIT, BANK_INIT_WITHDRAW,
+					Banker.Method.DEPOSIT, Banker.Method.IDLE);
+			banker.addSharedStates(BANK_INIT_WITHDRAW, INITIAL,
+					Banker.Method.WITHDRAW, Banker.Method.IDLE);
 
 			System.out.println("Setup alternative script...");
 
@@ -209,6 +213,16 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 					g.setColor(Color.BLACK);
 					g.drawString(patch.getCorrespondingSeed() == null ? "Weed"
 							: patch.getCorrespondingSeed().toString(), 130,
+							y + 10);
+					y += 15;
+				}
+			}
+			for (Entry<String, Integer> item : Product.notedProducts.entrySet()) {
+				if (item.getValue() > 0) {
+					g.setColor(Color.YELLOW);
+					g.fillRect(5, y, 200, 15);
+					g.setColor(Color.BLACK);
+					g.drawString(item.getKey() + ": " + item.getValue(), 10,
 							y + 10);
 					y += 15;
 				}

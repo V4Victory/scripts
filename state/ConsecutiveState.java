@@ -10,7 +10,6 @@ public class ConsecutiveState<T> extends State {
 	private static <T> State init(T[] values, State finalState,
 			StateCreator<T> stateCreator) {
 		State currentState = finalState;
-		System.out.println("Count values: " + values.length);
 		for (int i = values.length - 1; i >= 0; i--) {
 			currentState = stateCreator.getState(values[i], currentState);
 		}

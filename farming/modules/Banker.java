@@ -47,14 +47,7 @@ public class Banker extends SharedModule {
 				} while ((r = and_req) != null);
 			}
 		}
-		/*
-		 * System.out.println("All Requirements:"); for (Requirement req :
-		 * items) { System.out.println(req.id.get() + "->" + req.amount); }
-		 */
-		System.out.println("Total requirements: " + items.size());
-		for(Requirement item : items) {
-			System.out.println(">" + item);
-		}
+
 		return items;
 	}
 
@@ -109,7 +102,7 @@ public class Banker extends SharedModule {
 								state.add(new Edge(new Condition() {
 									public boolean validate() {
 										return Inventory.getCount(id) > (amount == 0 ? 0
-												: amount - 1);
+												: amount - 1) || Bank.getItem(id) == null;
 									}
 								}, nextState));
 								state.add(new Task(new Condition() {
