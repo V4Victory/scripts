@@ -133,8 +133,8 @@ public class Location {
 					new Tile(2672, 3369, 0))),
 			new Location("Catherby", new Area(new Tile(2800, 3471, 0),
 					new Tile(2816, 3458, 0))),
-			new Location("Trollheim", new Area(new Tile(2805, 3687, 0),
-					new Tile(2820, 3673, 0))) };
+			new Location("Trollheim", new Area(new Tile(2803, 3689, 0),
+					new Tile(2822, 3671, 0))) };
 
 	public boolean checkRequirements() {
 		if(module == null) return true;

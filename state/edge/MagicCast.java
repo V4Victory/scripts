@@ -25,22 +25,21 @@ public class MagicCast extends Edge {
 
 		if (spell_ == Magic.Lunar.HomeTeleport
 				|| spell_ == Magic.Standard.HomeTeleport) {
-			state.add(new Equip(Condition.TRUE, wielded, wielded,
-					Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
-							wielded, 2000)));
+			state.add(new Notification(Condition.TRUE, wielded,"No worries"));
 		} else {
 			state.add(new Equip(Condition.TRUE, wielded, f,
 					Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(f,
 							3000)));
 		}
 		State casted = new State("CST");
-		wielded.add(new Task(Condition.TRUE, casted) {
+		wielded.add(new Task(Condition.TRUE, s) {
 			public void run() {
+				System.out.println("Cast" + spell.getWidgetId());
 				Magic.cast(spell.getWidgetId());
 			}
 		});
-		casted.add(new Animation(Condition.TRUE, spell_.getAnimation(), s,
-				new Timeout(f, 5000)));
+		//casted.add(new Animation(Condition.TRUE, spell_.getAnimation(), s,
+	//			new Timeout(f, 5000)));
 		spell = spell_;
 	}
 }

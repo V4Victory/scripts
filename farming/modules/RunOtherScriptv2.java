@@ -2,35 +2,55 @@ package scripts.farming.modules;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.concurrent.strategy.StrategyDaemon;
 import org.powerbot.game.api.ActiveScript;
-import org.powerbot.game.api.util.Time;
+import org.powerbot.game.api.methods.interactive.Players;
 import org.powerbot.game.bot.Bot;
 import org.powerbot.game.bot.Context;
 
+import scripts.farming.Magic;
 import scripts.farming.FarmingProject;
+import scripts.farming.Patch;
+import scripts.farming.Patches;
 import scripts.farming.ScriptWrapper;
 import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
 import scripts.state.edge.Edge;
-import scripts.state.edge.Either;
 import scripts.state.edge.ExceptionSafeTask;
+import scripts.state.edge.MagicCast;
 import scripts.state.edge.Option;
 import scripts.state.edge.Task;
 import scripts.state.tools.OptionSelector;
 
-public class RunOtherScript extends Module {
+public class RunOtherScriptv2 extends Module {
 	// List<Strategy> newStrategies;
 	public Class<?> runningScript = null;
 	public ActiveScript activeScript;
 
-	public RunOtherScript(final FarmingProject main, State initial,
+	public static ActiveScript initiateScript(FarmingProject main,
+			Class<?> script) throws Exception {
+		ActiveScript activeScript = (ActiveScript) script.getDeclaredMethod(
+				"getInstance").invoke(null);
+		Field contextField = ActiveScript.class.getDeclaredField("context");
+		contextField.setAccessible(true);
+		Field botField = Context.class.getDeclaredField("bot");
+		botField.setAccessible(true);
+		Bot bot = (Bot) botField.get(contextField.get(main));
+		Context newContext = new Context(bot);
+		activeScript.init(newContext);
+
+		Method setupMethod = activeScript.getClass().getDeclaredMethod("setup");
+		setupMethod.setAccessible(true);
+		setupMethod.invoke(activeScript);
+		return activeScript;
+	}
+
+	public RunOtherScriptv2(final FarmingProject main, State initial,
 			State success, final State critical,
 			OptionSelector<Class<?>> selector, final Condition run,
 			final Condition interrupt) {
@@ -67,19 +87,14 @@ public class RunOtherScript extends Module {
 
 					script.getDeclaredMethod("prepare").invoke(null);
 					runningScript = script;
-					activeScript = (ActiveScript) script.getDeclaredMethod(
-							"getInstance").invoke(null);
 
-					Field botField = Context.class.getDeclaredField("bot");
-					botField.setAccessible(true);
-					Bot bot = (Bot) botField.get(Context.get());
-					Context newContext = new Context(bot);
-					activeScript.init(newContext);
-
-					Method setupMethod = activeScript.getClass()
-							.getDeclaredMethod("setup");
-					setupMethod.setAccessible(true);
-					setupMethod.invoke(activeScript);
+					if (!main.gui.miscSettings.setupScript) {
+						activeScript = initiateScript(main, script);
+					} else {
+						activeScript = main.gui.activeScript;
+						if (activeScript == null)
+							throw new Exception("Script Not Found");
+					}
 
 					Field executorField = ActiveScript.class
 							.getDeclaredField("executor");
@@ -105,7 +120,43 @@ public class RunOtherScript extends Module {
 							activeScript = null;
 						}
 					});
+					State curingDiseased = new State();
+					State disablingRemoteFarm = new State(); // when something
+																// went wrong
+					State interruptMovement = new State();
 
+					state.add(new Edge(new Condition() {
+						public boolean validate() {
+							boolean valid = false;
+							for (Patch patch : Patches.patches.values()) {
+								if (patch.isDiseased())
+									valid = true;
+							}
+							return main.gui.miscSettings.useRemoteFarm && valid;
+						}
+					}, interruptMovement));
+
+					interruptMovement.add(new MagicCast(new Condition() {
+						public boolean validate() {
+							return !Players.getLocal().isMoving();
+						}
+					}, curingDiseased, disablingRemoteFarm,
+							Magic.Lunar.RemoteFarm));
+
+					curingDiseased.add(new ExceptionSafeTask(Condition.TRUE,
+							state, state) {
+						public void run() {
+							System.out.println("CD");
+							Magic.cureAllDiseased();
+							System.out.println("/CD");
+						}
+					});
+
+					disablingRemoteFarm.add(new Task(Condition.TRUE, state) {
+						public void run() {
+							main.gui.miscSettings.useRemoteFarm = false;
+						}
+					});
 
 					for (final Strategy strategy : strategies) {
 						/*
@@ -128,7 +179,8 @@ public class RunOtherScript extends Module {
 								return strategy.validate();
 							}
 						}, strategyState));
-						strategyState.add(new ExceptionSafeTask(Condition.TRUE, state, interrupted) {
+						strategyState.add(new ExceptionSafeTask(Condition.TRUE,
+								state, interrupted) {
 							public void run() {
 								for (org.powerbot.concurrent.Task task : tasks) {
 									System.out.print("<T");

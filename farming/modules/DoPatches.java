@@ -113,6 +113,7 @@ public class DoPatches extends Module {
 		}, raking, sceneObject, "Rake", true));
 		raking.add(new Animation(Condition.TRUE, 2273, processProducts,
 				new Timeout(rakingFailed, 7000)));
+		raking.add(new Timeout(rakingFailed,15000));
 		rakingFailed.add(new Notification(Condition.TRUE, processProducts,
 				"Raking failed"));
 
@@ -254,13 +255,18 @@ public class DoPatches extends Module {
 		preharvesting.add(new InteractSceneObject(Condition.TRUE, harvesting,
 				sceneObject, patch.getHarvestingInteraction(), true));
 
-		harvesting.add(new Animation(Condition.TRUE, 2292, processProducts,
+		harvesting.add(new Animation(Condition.TRUE, 2292, harvesting,
 				new Timeout(harvestingFailed, 10000)));
 		harvesting.add(new Animation(Condition.TRUE, 830, clearing,
-				new Timeout(harvestingFailed, 3000)));
+				new Timeout(harvestingFailed, 10000)));
 		harvesting.add(new Animation(Condition.TRUE, 2282, harvesting,
 				new Timeout(harvestingFailed, 10000)));
-		harvesting.add(new Timeout(harvestingFailed, 2000));
+		harvesting.add(new Edge(new Condition() {
+			public boolean validate() {
+				return patch.isEmpty();
+			}
+		}, processProducts));
+		harvesting.add(new Timeout(harvestingFailed, 4000));
 
 		harvestingFailed.add(new Notification(Condition.TRUE, processProducts,
 				"Harvesting failed"));
@@ -283,7 +289,16 @@ public class DoPatches extends Module {
 		});
 		state.add(new UseItemWithSceneObject(new Condition() {
 			public boolean validate() {
-				return patch.isEmpty() && patch.countWeeds() == 0;
+				System.out.println("PLANT!!!!");
+				boolean b = false;
+				try {
+					System.out.println("Empty = " + patch.isEmpty());
+					System.out.println("Weeds = " + patch.countWeeds());
+					 b = patch.isEmpty() && patch.countWeeds() == 0;
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+				return b;
 			}
 		}, planting, new Value<Integer>() {
 			public Integer get() {
@@ -322,6 +337,7 @@ public class DoPatches extends Module {
 		}, planted));
 		watering.add(new Animation(Condition.TRUE, 2293, planted, new Timeout(
 				wateringFailed, 3000)));
+		watering.add(new Timeout(wateringFailed, 6000));
 		wateringFailed.add(new Notification(Condition.TRUE, planted,
 				"Watering failed"));
 

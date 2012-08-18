@@ -8,6 +8,7 @@ import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
 import scripts.state.edge.Animation;
+import scripts.state.edge.AssureLocation;
 import scripts.state.edge.Equip;
 import scripts.state.edge.MagicCast;
 import scripts.state.edge.Timeout;
@@ -35,10 +36,13 @@ public class LunarArdougneTele extends Module {
 				new Tile(2645, 3379, 0), new Tile(2652, 3381, 0),
 				new Tile(2660, 3381, 0), new Tile(2664, 3374, 0) };
 
+		INITIAL.add(new AssureLocation(Condition.TRUE,new Tile(2614,3351,0),3,TELEPORTED));
 		INITIAL.add(new MagicCast(Condition.TRUE, TELEPORTING, INITIAL,
 				Magic.Lunar.TeleportNorthArdougne));
 		TELEPORTING.add(new Animation(Condition.TRUE, 9606, TELEPORTED,
 				new Timeout(INITIAL, 10000)));
+		TELEPORTING.add(new AssureLocation(Condition.TRUE,new Tile(2614,3351,0),3,TELEPORTED));
+		TELEPORTING.add(new Timeout(INITIAL,8000));
 		TELEPORTED.add(new WalkPath(Condition.TRUE, path, SUCCESS, new Timeout(
 				INITIAL, 10000)));
 

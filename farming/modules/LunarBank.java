@@ -10,6 +10,7 @@ import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
 import scripts.state.edge.Animation;
+import scripts.state.edge.AssureLocation;
 import scripts.state.edge.MagicCast;
 import scripts.state.edge.Task;
 import scripts.state.edge.Timeout;
@@ -26,6 +27,7 @@ public class LunarBank extends Module {
 		Tile[] path = new Tile[] { new Tile(2093, 3914, 0),
 				new Tile(2098, 3919, 0) };
 
+		INITIAL.add(new AssureLocation(Condition.TRUE,new Tile(2085,3914,0),3,TELEPORTED));
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
 				Magic.Lunar.HomeTeleport));
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
@@ -41,8 +43,11 @@ public class LunarBank extends Module {
 				Time.sleep(700);
 			}
 		});
-		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
-				new Timeout(INITIAL, 15000)));
+		// Unsafe, because spell can be interrupted
+//		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
+//				new Timeout(INITIAL, 15000)));
+		TELEPORTING.add(new AssureLocation(Condition.TRUE,new Tile(2085,3914,0),3,TELEPORTED));
+		TELEPORTING.add(new Timeout(INITIAL,8000));
 
 		TELEPORTED.add(new WalkPath(Condition.TRUE, path, SUCCESS, new Timeout(
 				INITIAL, 10000)));

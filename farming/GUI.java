@@ -7,12 +7,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Set;
@@ -30,10 +32,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.util.Filter;
-
-import scripts.djharvest.ScriptWrapper;
-import scripts.farming.modules.RunOtherScript;
 
 import scripts.state.Module;
 
@@ -41,6 +41,28 @@ public class GUI extends JFrame {
 
 	boolean isDone_;
 	File settingsPath;
+	public ActiveScript activeScript = null; // contains only the activeScript if setupScript = true
+	public MiscSettings miscSettings = new MiscSettings();
+
+	public static class MiscSettings implements Serializable {
+		private static final long serialVersionUID = 0L;
+		public boolean useRemoteFarm = false;
+		public boolean scriptsEnabled = true;
+		public boolean setupScript = true;
+
+		private void readObject(ObjectInputStream is)
+				throws ClassNotFoundException, IOException {
+			scriptsEnabled = is.readBoolean();
+			setupScript = is.readBoolean();
+			useRemoteFarm = is.readBoolean();
+		}
+
+		private void writeObject(ObjectOutputStream os) throws IOException {
+			os.writeBoolean(scriptsEnabled);
+			os.writeBoolean(setupScript);
+			os.writeBoolean(useRemoteFarm);
+		}
+	}
 
 	public boolean isDone() {
 		return isDone_;
@@ -68,7 +90,6 @@ public class GUI extends JFrame {
 	JFormattedTextField patchTypeRating = new JFormattedTextField(
 			NumberFormat.getIntegerInstance());
 	JComboBox<String> scripts = new JComboBox<String>();
-	JButton button = new JButton("Start");
 
 	public GUI(File path, ScriptLoader loader) {
 		settingsPath = path;
@@ -87,6 +108,7 @@ public class GUI extends JFrame {
 			JPanel locationTab = new JPanel();
 			JPanel patchTab = new JPanel();
 			JPanel scriptTab = new JPanel();
+			JPanel miscTab = new JPanel();
 
 			JTabbedPane tabs = new JTabbedPane();
 			tabs.addTab("Locations", new ImageIcon("images/home_tele.png"),
@@ -94,28 +116,11 @@ public class GUI extends JFrame {
 			tabs.addTab("Patchs", new ImageIcon("images/farming.png"), patchTab);
 			tabs.addTab("Scripts", new ImageIcon("images/minigame.png"),
 					scriptTab);
+			tabs.addTab("Misc", miscTab);
 			locations.setMaximumSize(new Dimension(200, 20));
 			teleports.setMaximumSize(new Dimension(200, 20));
 			scripts.setMaximumSize(new Dimension(220, 20));
-			locations.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					final Location location = (Location) locations
-							.getSelectedItem();
 
-					teleports.removeAllItems();
-					if (location == null)
-						return;
-					Set<Module> options = location.getTeleportOptions();
-					if (location.selectedTeleportOption != null) {
-						teleports.addItem(location.selectedTeleportOption);
-					}
-					for (Module option : options) {
-						System.out.println(">" + option.toString());
-						if (option != location.selectedTeleportOption)
-							teleports.addItem(option);
-					}
-				}
-			});
 			teleports.addItemListener(new ItemListener() {
 				public void itemStateChanged(ItemEvent e) {
 					if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -137,14 +142,15 @@ public class GUI extends JFrame {
 				}
 			});
 
-			button.addMouseListener(new MouseAdapter() {
+			MouseListener startButtonListener = new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					setSelectedScript((String) scripts.getSelectedItem());
+
 					saveSettings();
 					GUI.this.setVisible(false);
 					isDone_ = true;
 				}
-			});
+			};
 
 			// Locations tab
 			{
@@ -174,6 +180,25 @@ public class GUI extends JFrame {
 							enable.setVisible(true);
 					}
 				});
+				locations.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						final Location location = (Location) locations
+								.getSelectedItem();
+						teleports.removeAllItems();
+						if (location == null)
+							return;
+						Set<Module> options = location.getTeleportOptions();
+						if (location.selectedTeleportOption != null) {
+							teleports.addItem(location.selectedTeleportOption);
+						}
+						for (Module option : options) {
+							System.out.println(">" + option.toString());
+							if (option != location.selectedTeleportOption)
+								teleports.addItem(option);
+						}
+						enable.setSelected(location.activated);
+					}
+				});				
 				enable.addItemListener(new ItemListener() {
 					public void itemStateChanged(ItemEvent e) {
 						Location location = (Location) locations
@@ -194,6 +219,10 @@ public class GUI extends JFrame {
 						BoxLayout.Y_AXIS));
 				locationTab.add(firstRow);
 				locationTab.add(secondRow);
+
+				JButton button = new JButton("Start Script");
+				button.addMouseListener(startButtonListener);
+				locationTab.add(button);
 			}
 
 			// Patchs Tab
@@ -247,36 +276,77 @@ public class GUI extends JFrame {
 				});
 				patchTab.add(rows[0]);
 				patchTab.add(scroll);
+
+				JButton button = new JButton("Start Script");
+				button.addMouseListener(startButtonListener);
+				patchTab.add(button);
 			}
 
 			// Script Tab
 			{
-				final JPanel firstRow = new JPanel();
+				//final JPanel firstRow = new JPanel();
 				final JPanel secondRow = new JPanel();
 
 				secondRow.setVisible(scriptsEnabled);
 				JCheckBox enable = new JCheckBox("Alternative script enabled",
-						scriptsEnabled);
+						miscSettings.scriptsEnabled);
+				final JCheckBox setup = new JCheckBox(
+						"Setup alternative script immediately",
+						miscSettings.setupScript);
 				enable.addItemListener(new ItemListener() {
 					public void itemStateChanged(ItemEvent e) {
 						if (e.getStateChange() == ItemEvent.DESELECTED) {
-							scriptsEnabled = false;
+							miscSettings.scriptsEnabled = false;
 						} else if (e.getStateChange() == ItemEvent.SELECTED) {
-							scriptsEnabled = true;
+							miscSettings.scriptsEnabled = true;
 						}
-						secondRow.setVisible(scriptsEnabled);
+						secondRow.setVisible(miscSettings.scriptsEnabled);
+						setup.setVisible(miscSettings.scriptsEnabled);
 					}
 				});
-				firstRow.add(enable);
+
+				setup.addItemListener(new ItemListener() {
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.DESELECTED) {
+							miscSettings.setupScript = false;
+						} else if (e.getStateChange() == ItemEvent.SELECTED) {
+							miscSettings.setupScript = true;
+						}
+					}
+				});
+				//firstRow.add(enable);
 				secondRow.setLayout(new BoxLayout(secondRow, BoxLayout.X_AXIS));
 				secondRow.add(new JLabel("Choose a script: "));
 				// secondRow.add(Box.createRigidArea(new Dimension(5,0)));
 				secondRow.add(scripts);
 
 				scriptTab.setLayout(new BoxLayout(scriptTab, BoxLayout.Y_AXIS));
-				scriptTab.add(firstRow);
+				scriptTab.add(enable);
+				scriptTab.add(setup);
 				scriptTab.add(secondRow);
+				JButton button = new JButton("Start Script");
+				button.addMouseListener(startButtonListener);
 				scriptTab.add(button);
+			}
+
+			/** MISC TAB **/
+			{
+				JCheckBox useRemoteFarm = new JCheckBox("Use Remote Farm",
+						miscSettings.useRemoteFarm);
+				useRemoteFarm.addItemListener(new ItemListener() {
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.DESELECTED) {
+							miscSettings.useRemoteFarm = false;
+						} else if (e.getStateChange() == ItemEvent.SELECTED) {
+							miscSettings.useRemoteFarm = true;
+						}
+					}
+				});
+				miscTab.setLayout(new BoxLayout(miscTab, BoxLayout.Y_AXIS));
+				miscTab.add(useRemoteFarm);
+				JButton button = new JButton("Start Script");
+				button.addMouseListener(startButtonListener);
+				miscTab.add(button);
 			}
 
 			this.add(tabs);
@@ -359,7 +429,8 @@ public class GUI extends JFrame {
 				oos.writeObject(selectedScriptName);
 			else
 				oos.writeObject(new String(""));
-			oos.writeBoolean(scriptsEnabled);
+			//oos.writeBoolean(scriptsEnabled);
+			oos.writeObject(miscSettings);
 			oos.close();
 			fos.close();
 			System.out.println(">Finished!");
@@ -377,7 +448,7 @@ public class GUI extends JFrame {
 			FileInputStream fis = new FileInputStream(settingsPath);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			int l = ois.readInt();
-			//System.out.print("Load locations");
+			// System.out.print("Load locations");
 			for (int i = 0; i < l; i++) {
 				boolean activated = ois.readBoolean();
 				String lname = (String) ois.readObject();
@@ -385,24 +456,27 @@ public class GUI extends JFrame {
 				Location location = Location.getLocation(lname);
 				location.activated = activated;
 				if (location != null) {
-				//	System.out.println(ltele);
+					// System.out.println(ltele);
 					for (Module option : location.getTeleportOptions()) {
 						System.out.println(option.toString());
 						if (option.toString().equals(ltele)) {
-							System.out.println(location.name + "-" + location.selectedTeleportOption + "-" + option);
+							System.out.println(location.name + "-"
+									+ location.selectedTeleportOption + "-"
+									+ option);
 							location.selectedTeleportOption = option;
 						}
 					}
 
-					if(location.selectedTeleportOption == null) {
-						if(location.getTeleportOptions().size()>0)
-							location.selectedTeleportOption = location.getTeleportOptions().iterator().next();
+					if (location.selectedTeleportOption == null) {
+						if (location.getTeleportOptions().size() > 0)
+							location.selectedTeleportOption = location
+									.getTeleportOptions().iterator().next();
 					}
 				}
-			//	System.out.print(".");
+				// System.out.print(".");
 			}
-			//System.out.println("");
-			//System.out.print("Load patches");
+			// System.out.println("");
+			// System.out.print("Load patches");
 			l = ois.readInt();
 			for (int i = 0; i < l; i++) {
 				int id = ois.readInt();
@@ -420,7 +494,7 @@ public class GUI extends JFrame {
 				Patches.setTypeRating(i, ois.readInt());
 			}
 			selectedScriptName = (String) ois.readObject();
-			scriptsEnabled = ois.readBoolean();
+			miscSettings = (MiscSettings) ois.readObject();
 			ois.close();
 			fis.close();
 			System.out.println(">Finished!");

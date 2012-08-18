@@ -8,8 +8,8 @@ public class Edge {
 	protected State state;
 	
 	public Edge(Condition condition_, State state_) {
-		condition = condition_;
-		state = state_;
+		setCondition(condition_);
+		setState(state_);
 	}
 	
 	public Edge(Condition condition_) {

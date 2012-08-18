@@ -16,6 +16,7 @@ import scripts.farming.ScriptWrapper;
 public class FletchWrapper {
 
 	private static MapleLongbowFletch instance = null;
+	
 	public static ActiveScript getInstance() {
 		if(instance == null) {
 			instance = new MapleLongbowFletch();

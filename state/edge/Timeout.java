@@ -18,6 +18,7 @@ public class Timeout extends Edge {
 			if(timer == null) {
 				timer = new Timer(timeout_);
 			}
+			if(!timer.isRunning()) System.out.println("Timeout"+timeout_);
 			return !timer.isRunning();
 		}});
 		setState(state);

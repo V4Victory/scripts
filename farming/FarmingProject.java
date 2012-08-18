@@ -26,7 +26,7 @@ import org.powerbot.game.bot.event.listener.PaintListener;
 
 import scripts.farming.modules.Banker;
 import scripts.farming.modules.DoPatches;
-import scripts.farming.modules.RunOtherScript;
+import scripts.farming.modules.RunOtherScriptv2;
 import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
@@ -50,10 +50,11 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 	State LOAD_GUI;
 	State BANK_INIT_DEPOSIT;
 	State BANK_INIT_WITHDRAW;
+	State LOAD_ACTIVE_SCRIPT;
 
 	public ScriptLoader loader;
 	public Banker banker;
-	public RunOtherScript MODULE_RUN_SCRIPT;
+	public RunOtherScriptv2 MODULE_RUN_SCRIPT;
 
 	protected void setup() {
 		try {
@@ -65,6 +66,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 			CRITICAL_FAIL = new State("C");
 			ON_CHOOSE_LOCATION = new State("O");
 			LOAD_GUI = new State("G");
+			LOAD_ACTIVE_SCRIPT = new State("LAS");
 			BANK_INIT_DEPOSIT = new State("BID");
 			BANK_INIT_WITHDRAW = new State("BIW");
 			banker = new Banker(this, new State("BI"), new State("BS"),
@@ -72,14 +74,16 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 			provide(new StateStrategy(LOAD_GUI, Condition.TRUE));
 			provide(new Antiban());
-			
+
 			INITIAL.add(new Edge(new Condition() {
 				public boolean validate() {
 					System.out.println("Total work = "
 							+ Patches.countAllWork(true));
 					boolean b = false;
-					for(Location location : Location.locations) {
-						if(!location.isBank() && location.activated && location.checkRequirements()) b = true;
+					for (Location location : Location.locations) {
+						if (!location.isBank() && location.activated
+								&& location.checkRequirements())
+							b = true;
 					}
 					return Patches.countAllWork(true) > 0 && b;
 				}
@@ -142,7 +146,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				}
 
 			}
-			
+
 			Condition scriptStartCondition = new Condition() {
 				public boolean validate() {
 					return Patches.countAllWork(false) == 0
@@ -154,10 +158,33 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				public boolean validate() {
 					return gui.isDone();
 				}
-			}, INITIAL));
-			
-			/** When there is no location that we can visit with our current items, go to bank **/
-			INITIAL.add(new Edge(scriptStartCondition.negate(), BANK_INIT_DEPOSIT));
+			}, LOAD_ACTIVE_SCRIPT));
+
+			LOAD_ACTIVE_SCRIPT.add(new scripts.state.edge.Task(new Condition() {
+				public boolean validate() {
+					return gui.miscSettings.setupScript;
+				}
+			}, INITIAL) {
+				public void run() {
+					try {
+						gui.activeScript = RunOtherScriptv2.initiateScript(
+								FarmingProject.this, gui.getSelectedScript());
+					} catch (Exception e1) {
+						gui.activeScript = null;
+						e1.printStackTrace();
+						System.out.println("Descr:" + e1.getMessage());
+					}
+
+				}
+			});
+			LOAD_ACTIVE_SCRIPT.add(new Edge(Condition.TRUE, INITIAL));
+
+			/**
+			 * When there is no location that we can visit with our current
+			 * items, go to bank
+			 **/
+			INITIAL.add(new Edge(scriptStartCondition.negate(),
+					BANK_INIT_DEPOSIT));
 
 			banker.addSharedStates(BANK_INIT_DEPOSIT, BANK_INIT_WITHDRAW,
 					Banker.Method.DEPOSIT, Banker.Method.IDLE);
@@ -166,7 +193,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 			System.out.println("Setup alternative script...");
 
-			MODULE_RUN_SCRIPT = new RunOtherScript(this, INITIAL, INITIAL,
+			MODULE_RUN_SCRIPT = new RunOtherScriptv2(this, INITIAL, INITIAL,
 					CRITICAL_FAIL, new OptionSelector<Class<?>>() {
 						public Class<?> select() {
 							return gui.getSelectedScript();
@@ -178,8 +205,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 					});
 
 			System.out.println("Start GUI...");
-			gui = new GUI(new File(Environment.getStorageDirectory(),
-					Players.getLocal().getName()+"-farming-settings.ini"), loader);
+			gui = new GUI(new File(Environment.getStorageDirectory(), Players
+					.getLocal().getName() + "-farming-settings.ini"), loader);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -237,7 +264,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				}
 			}
 			for (Entry<String, Integer> item : Product.notedProducts.entrySet()) {
-				/*if (item.getValue() > 0)*/ {
+				/* if (item.getValue() > 0) */{
 					g.setColor(Color.YELLOW);
 					g.fillRect(5, y, 200, 15);
 					g.setColor(Color.BLACK);
@@ -280,19 +307,23 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 	public class Antiban extends Strategy implements Task {
 		Timer timer = new Timer(Random.nextInt(30000, 40000));
 
-
 		public void run() {
 			int action = Random.nextInt(0, 4);
 			switch (action) {
 			case 0:
 				int randomSkill = Random.nextInt(0, 24);
-                Tabs.STATS.open();
-                WidgetChild randStat = Skills.getWidgetChild(randomSkill);
-                Point randStatPoint = randStat.getAbsoluteLocation();
-                randStatPoint.x += Random.nextInt(-10, 10); //Don't have the mouse go to the EXACT same spot every time! :)
-                randStatPoint.y += Random.nextInt(-10, 10); //Also, you can change all of these values. >_>
-                Mouse.move(randStatPoint);
-                break;
+				Tabs.STATS.open();
+				WidgetChild randStat = Skills.getWidgetChild(randomSkill);
+				Point randStatPoint = randStat.getAbsoluteLocation();
+				randStatPoint.x += Random.nextInt(-10, 10); // Don't have the
+															// mouse go to the
+															// EXACT same spot
+															// every time! :)
+				randStatPoint.y += Random.nextInt(-10, 10); // Also, you can
+															// change all of
+															// these values. >_>
+				Mouse.move(randStatPoint);
+				break;
 			default:
 				int currentPitch = Camera.getPitch();
 				int currentYaw = Camera.getYaw();
@@ -300,9 +331,9 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				Camera.setAngle(currentYaw + Random.nextInt(-70, 70));
 				break;
 			}
-			if(Widgets.get(906,186).isOnScreen()) {
-				Widgets.get(906,186).click(true);
-				Time.sleep(700,3000);
+			if (Widgets.get(906, 186).isOnScreen()) {
+				Widgets.get(906, 186).click(true);
+				Time.sleep(700, 3000);
 			}
 			timer.setEndIn(Random.nextInt(30000, 40000));
 		}

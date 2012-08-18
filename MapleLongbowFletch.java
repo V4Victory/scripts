@@ -1,5 +1,8 @@
 package scripts;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
@@ -21,7 +24,12 @@ public class MapleLongbowFletch extends ActiveScript {
 
 		Withdraw w = new Withdraw();
 		provide(new Strategy(w,w));
-
+		JFrame frame = new JFrame("MY COOL GUI");
+		frame.add(new JLabel("Blub"));
+		frame.pack();
+		frame.setVisible(true);
+		frame.setResizable(false);
+		frame.setLocation(50, 50);
 	}
 	
 	public class Withdraw extends Strategy implements Condition, Task {

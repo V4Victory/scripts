@@ -10,6 +10,7 @@ import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
 import scripts.state.edge.Animation;
+import scripts.state.edge.AssureLocation;
 import scripts.state.edge.MagicCast;
 import scripts.state.edge.Task;
 import scripts.state.edge.Timeout;
@@ -33,6 +34,8 @@ public class DraynorLoadstone extends Module {
 				new Tile(3063, 3324, 0), new Tile(3061, 3317, 0),
 				new Tile(3057, 3311, 0) };
 
+		INITIAL.add(new AssureLocation(Condition.TRUE, new Tile(3105, 3298, 0),
+				3, TELEPORTED));
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
 				Magic.Standard.HomeTeleport));
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
@@ -48,8 +51,11 @@ public class DraynorLoadstone extends Module {
 				Time.sleep(700);
 			}
 		});
-		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
-				new Timeout(INITIAL, 15000)));
+		// TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
+		// new Timeout(INITIAL, 15000)));
+		TELEPORTING.add(new AssureLocation(Condition.TRUE, new Tile(3105, 3298,
+				0), 3, TELEPORTED));
+		TELEPORTING.add(new Timeout(INITIAL, 15000));
 		TELEPORTED.add(new WalkPath(Condition.TRUE, path, SUCCESS, new Timeout(
 				INITIAL, 10000)));
 

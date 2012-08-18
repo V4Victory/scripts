@@ -10,6 +10,7 @@ import scripts.state.Condition;
 import scripts.state.Module;
 import scripts.state.State;
 import scripts.state.edge.Animation;
+import scripts.state.edge.AssureLocation;
 import scripts.state.edge.MagicCast;
 import scripts.state.edge.Task;
 import scripts.state.edge.Timeout;
@@ -32,23 +33,27 @@ public class CatherbyLoadstone extends Module{
 				,new Tile(2812,3461,0)
 				};
 	
-		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
-				Magic.Lunar.HomeTeleport));
+		INITIAL.add(new AssureLocation(Condition.TRUE,new Tile(2831,3451,0),3,TELEPORTED));
 		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
 				Magic.Standard.HomeTeleport));
+		INITIAL.add(new MagicCast(Condition.TRUE, CASTED, INITIAL,
+				Magic.Lunar.HomeTeleport));
 		CASTED.add(new Task(new Condition() {
 			public boolean validate() {
-				return Widgets.get(1092, 43).isOnScreen();
+				return Widgets.get(1092, 43).validate();
 			}
 		}, TELEPORTING) {
 			public void run() {
 				Mouse.move(Widgets.get(1092,43).getCentralPoint());
-				Widgets.get(1092, 43).click(true);
-				Time.sleep(700);
+				Mouse.click(true);
+				//Widgets.get(1092, 43).click(true);
+				//Time.sleep(700);
 			}
 		});
-		TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
-				new Timeout(INITIAL, 15000)));
+		//TELEPORTING.add(new Animation(Condition.TRUE, 16385, TELEPORTED,
+		//		new Timeout(INITIAL, 15000)));
+		TELEPORTING.add(new AssureLocation(Condition.TRUE,new Tile(2831,3451,0),3,TELEPORTED));
+		TELEPORTING.add(new Timeout(INITIAL,15000));
 		TELEPORTED.add(new WalkPath(Condition.TRUE,path,SUCCESS,new Timeout(INITIAL,10000)));
 
 	}
