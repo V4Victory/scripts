@@ -9,8 +9,11 @@ import org.powerbot.game.api.methods.widget.Bank;
 import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.node.Item;
 
+import scripts.farming.Patches;
+import scripts.farming.Equipment;
 import scripts.farming.FarmingProject;
 import scripts.farming.Location;
+import scripts.farming.Patch;
 import scripts.state.Condition;
 import scripts.state.ConsecutiveState;
 import scripts.state.Module;
@@ -83,6 +86,7 @@ public class Banker extends SharedModule {
 		Location.getLocation("Bank").setModule(this);
 
 		State BANKING_FINISHED = new State("BANKF");
+		State BANKING_FINISHED_WITHDRAW = new State("BANKFWD");
 		State BANK_OPEN = new State("BANKO");
 		State DEPOSIT = new State("BANKD");
 
@@ -91,7 +95,7 @@ public class Banker extends SharedModule {
 					public List<Requirement> get() {
 						return getRequirements(main);
 					}
-				}, BANKING_FINISHED, new StateCreator<Requirement>() {
+				}, BANKING_FINISHED_WITHDRAW, new StateCreator<Requirement>() {
 					public State getState(Requirement value, State nextState) {
 						State state = new State(value.toString());
 						int i = 0;
@@ -105,7 +109,9 @@ public class Banker extends SharedModule {
 								state.add(new Edge(new Condition() {
 									public boolean validate() {
 										return Inventory.getCount(id) > (amount == 0 ? 0
-												: amount - 1) || (or_req == null && Bank.getItem(id) == null);
+												: amount - 1)
+												|| (or_req == null && Bank
+														.getItem(id) == null);
 									}
 								}, nextState));
 								state.add(new Task(new Condition() {
@@ -120,14 +126,14 @@ public class Banker extends SharedModule {
 								});
 								state.add(new Notification(new Condition() {
 									public boolean validate() {
-										return !val.optional;
+										return !val.optional && or_req == null;
 									}
 								}, critical, "Having #" + id + " is mandatory"));
-							}					
+							}
 						} while ((value = value.or_req) != null);
 
 						if (i == 0)
-							state.add(new Edge(Condition.TRUE,nextState));
+							state.add(new Edge(Condition.TRUE, nextState));
 						return state;
 					}
 				});
@@ -164,14 +170,32 @@ public class Banker extends SharedModule {
 
 		DEPOSIT.add(new Task(Condition.TRUE, DEPOSIT) {
 			public void run() {
-				Bank.depositEquipment();
-				Bank.depositInventory();
+				if (Equipment.WEAPON.getEquipped() > 0)
+					Bank.depositEquipment();
+				if (Inventory.getCount() > 0)
+					Bank.depositInventory();
 			}
 		});
 
 		BANKING_FINISHED.add(new Task(Condition.TRUE, success) {
 			public void run() {
-				//Bank.close();
+				// Bank.close();
+			}
+		});
+
+		BANKING_FINISHED_WITHDRAW.add(new Task(Condition.TRUE, success) {
+			public void run() {
+				boolean change = false;
+				for (Patch patch : Patches.patches.values()) {
+					if (!patch.getRequirement().validate()) {
+						System.out.println(patch + " deactivated");
+						patch.activated = false;
+						change = true;
+					}
+				}
+				if (change)
+					FarmingProject.gui.saveSettings();
+				Bank.close();
 			}
 		});
 

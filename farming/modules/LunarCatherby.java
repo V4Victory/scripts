@@ -27,10 +27,7 @@ public class LunarCatherby extends Module {
 		State TELEPORTING = new State();
 
 		Tile[] path = new Tile[] { new Tile(2807, 3463, 0) };
-		
-		INITIAL.add(new Equip(Condition.TRUE, INITIAL,
-				Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
-						INITIAL, 5000)));
+
 		INITIAL.add(new MagicCast(Condition.TRUE, TELEPORTING, INITIAL,
 				Magic.Lunar.TeleportCatherby));
 

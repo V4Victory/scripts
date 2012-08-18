@@ -1,13 +1,16 @@
 package scripts.farming;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
 
 import org.powerbot.game.api.ActiveScript;
 
-import scripts.farming.modules.DoPatches;
+import scripts.state.Condition;
+import scripts.state.ConsecutiveState;
+import scripts.state.State;
+import scripts.state.StateCreator;
+import scripts.state.edge.Edge;
 
 public class GUITest {
 
@@ -131,10 +134,18 @@ public class GUITest {
 	}
 
 	public static void main(String[] args) {
-		final GUI gui;
-		ScriptLoader loader = new ScriptLoader();
-		gui = new GUI(new File("farming-settings.ini"), loader);
-		System.out.println(DoPatches.getSeedRequirements(Location.getLocation("Falador")));
+		//final GUI gui;
+		//ScriptLoader loader = new ScriptLoader();
+		//gui = new GUI(new File("farming-settings.ini"), loader);
+		//System.out.println(DoPatches.getSeedRequirements(Location.getLocation("Falador")));
+		State f = new State();
+		State s = new ConsecutiveState<Integer>(new Integer[]{1,2,3,4,5,6}, f, new StateCreator<Integer>() {
+			public State getState(final Integer anim, State nextState) {
+				System.out.println(anim);
+				return new State(anim.toString()).add(new Edge(Condition.TRUE,nextState));
+			}
+		});
+		while((s=s.run())!=f);
 	}
 
 }

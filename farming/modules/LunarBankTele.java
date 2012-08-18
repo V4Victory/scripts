@@ -27,9 +27,6 @@ public class LunarBankTele extends Module {
 		Tile[] path = new Tile[] { new Tile(2109, 3915, 0),
 				new Tile(2102, 3915, 0), new Tile(2098, 3919, 0) };
 
-		INITIAL.add(new Equip(Condition.TRUE, INITIAL,
-				Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
-						INITIAL, 5000)));
 		INITIAL.add(new MagicCast(Condition.TRUE, TELEPORTED, INITIAL,
 				Magic.Lunar.TeleportMoonClan));
 		TELEPORTED.add(new WalkPath(Condition.TRUE, path, SUCCESS, new Timeout(

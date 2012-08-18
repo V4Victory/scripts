@@ -72,7 +72,7 @@ public class Patch {
 		return type!=Patches.Herb && type!=Patches.Tree;
 	}
 	public Seed getCorrespondingSeed() {
-		int s = getState();
+		int s = getState() & 0x3f;
 		for(Map.Entry<Integer,Seed> seed : Seed.seeds.entrySet()) {
 			if(seed.getValue().getType() == type && seed.getValue().getLow()<=s && s<=seed.getValue().getHigh()) {
 				return seed.getValue();

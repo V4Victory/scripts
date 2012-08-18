@@ -46,8 +46,10 @@ public class Product {
 		public void run(Product p) {
 			Item item;
 			while((item = Inventory.getItem(p.id)) != null) {
+				int count = Inventory.getCount(p.id);
 				item.getWidgetChild().interact("Drop");
-				Time.sleep(700);
+				while(count == Inventory.getCount(p.id)) Time.sleep(10);
+				Time.sleep(100);
 			}			
 		}
 	};
@@ -58,8 +60,11 @@ public class Product {
 			Camera.setPitch(89);
 			final Item item = Inventory.getItem(p.id);
 			if(item == null) return;		
+			System.out.println(item.getName());
 			if(notedProducts.containsKey(item.getName()))
 				notedProducts.put(item.getName(), notedProducts.get(item.getName()) + Inventory.getCount(p.id));
+			else
+				notedProducts.put(item.getName(), Inventory.getCount(p.id));
 			final Timer timer = new Timer(2000);
 			waitFor(new Condition() { 
 				public boolean validate() {
@@ -133,6 +138,7 @@ public class Product {
 				new Product(24155,"Double spin ticket",new Interact("Claim spin")),
 				new Product(14664,"Mini-event gift",Drop),
 				new Product(6055,"Weed",Drop),
+				new Product(229,"Empty vial",Drop),
 				new Product(199,"Grimy Guam",Drop,GiveToLeprechaun,Clean),
 				new Product(249,"Clean Guam",Drop,GiveToLeprechaun),
 				new Product(201,"Grimy Marrentil",Drop,GiveToLeprechaun,Clean),

@@ -4,6 +4,7 @@ public class Constants {
 	public final static int NatureRune= 561; 	
 	public final static int LawRune = 563;
 	public final static int Ectophial = 4251;
+	public final static int PlantCure = 6036;
 	public final static int MudBattleStaff = 6562;
 	public final static int MysticMudBattleStaff = 6563;
 	public final static int MagicSecateurs = 7409;

@@ -41,7 +41,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 	Timer timer = new Timer(0);
 
-	GUI gui;
+	public static GUI gui;
 
 	State INITIAL;
 	State CRITICAL_FAIL;
@@ -76,8 +76,12 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 			INITIAL.add(new Edge(new Condition() {
 				public boolean validate() {
 					System.out.println("Total work = "
-							+ Patches.countAllWork(false));
-					return Patches.countAllWork(false) > 0;
+							+ Patches.countAllWork(true));
+					boolean b = false;
+					for(Location location : Location.locations) {
+						if(!location.isBank() && location.activated && location.checkRequirements()) b = true;
+					}
+					return Patches.countAllWork(true) > 0 && b;
 				}
 			}, ON_CHOOSE_LOCATION));
 
@@ -89,7 +93,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 							Integer mostWorkCount = 0;
 							// select the location with the most work to do
 							for (Location location : Location.locations) {
-								if (location.isBank() || !location.checkRequirements())
+								if (location.isBank())
 									continue;
 								if (location.area.contains(Players.getLocal())
 										&& location.countWork(true) > 0) {
@@ -99,8 +103,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 
 								if (location.activated
 										&& mostWorkCount < location
-												.countWork(false)) {
-									mostWorkCount = location.countWork(false);
+												.countWork(true)) {
+									mostWorkCount = location.countWork(true);
 									loc = location;
 								}
 							}
@@ -138,6 +142,13 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				}
 
 			}
+			
+			Condition scriptStartCondition = new Condition() {
+				public boolean validate() {
+					return Patches.countAllWork(false) == 0
+							&& gui.scriptsEnabled;
+				}
+			};
 
 			LOAD_GUI.add(new Edge(new Condition() {
 				public boolean validate() {
@@ -146,11 +157,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 			}, INITIAL));
 			
 			/** When there is no location that we can visit with our current items, go to bank **/
-			INITIAL.add(new Edge(new Condition() {
-				public boolean validate() {
-					return false;
-				}
-			}, BANK_INIT_DEPOSIT));
+			INITIAL.add(new Edge(scriptStartCondition.negate(), BANK_INIT_DEPOSIT));
 
 			banker.addSharedStates(BANK_INIT_DEPOSIT, BANK_INIT_WITHDRAW,
 					Banker.Method.DEPOSIT, Banker.Method.IDLE);
@@ -164,12 +171,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 						public Class<?> select() {
 							return gui.getSelectedScript();
 						}
-					}, new Condition() {
-						public boolean validate() {
-							return Patches.countAllWork(false) == 0
-									&& gui.scriptsEnabled;
-						}
-					}, new Condition() {
+					}, scriptStartCondition, new Condition() {
 						public boolean validate() {
 							return Patches.countAllWork(true) > 9;
 						}
@@ -235,7 +237,7 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 				}
 			}
 			for (Entry<String, Integer> item : Product.notedProducts.entrySet()) {
-				if (item.getValue() > 0) {
+				/*if (item.getValue() > 0)*/ {
 					g.setColor(Color.YELLOW);
 					g.fillRect(5, y, 200, 15);
 					g.setColor(Color.BLACK);
@@ -306,7 +308,8 @@ public class FarmingProject extends ActiveScript implements PaintListener {
 		}
 
 		public boolean validate() {
-			return !timer.isRunning();
+			// don't mess with the antiban of the other script
+			return !timer.isRunning() && MODULE_RUN_SCRIPT.activeScript == null;
 		}
 	}
 

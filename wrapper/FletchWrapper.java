@@ -24,11 +24,6 @@ public class FletchWrapper {
 	}
 	
 	public static void prepare() {
-		Magic.cast(Magic.Lunar.TeleportMoonClan.getWidgetId());
-		Time.sleep(4300);
-		Walking.walk(new Tile(2098,3919,0));
-		Time.sleep(1300);
-		while(Players.getLocal().isMoving()) Time.sleep(20);
 		Bank.open();
 		Bank.depositInventory();
 	}
@@ -37,8 +32,6 @@ public class FletchWrapper {
 		Bank.open();
 		Time.sleep(1300,1500);
 		Bank.depositInventory();
-		Time.sleep(1300,1500);
-		Bank.close();
 	}
 
 

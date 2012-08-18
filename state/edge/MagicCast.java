@@ -20,18 +20,27 @@ public class MagicCast extends Edge {
 				return Skills.getLevel(Skills.MAGIC) >= spell_.getMagicLevel()
 						&& Magic.getCurrentSpellbook() == spell_.getSpellbook();
 			}
-		}), new State());
-		state.add(new Equip(Condition.TRUE, state, Constants.MudBattleStaff,
-				Equipment.WEAPON, new Timeout(f, 3000)));
-		State casted = new State();
-		state.add(new Task(Condition.TRUE, casted) {
+		}), new State("MAGICCAST"));
+		State wielded = new State("WLD");
+
+		if (spell_ == Magic.Lunar.HomeTeleport
+				|| spell_ == Magic.Standard.HomeTeleport) {
+			state.add(new Equip(Condition.TRUE, wielded, wielded,
+					Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
+							wielded, 2000)));
+		} else {
+			state.add(new Equip(Condition.TRUE, wielded, f,
+					Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(f,
+							3000)));
+		}
+		State casted = new State("CST");
+		wielded.add(new Task(Condition.TRUE, casted) {
 			public void run() {
 				Magic.cast(spell.getWidgetId());
 			}
 		});
 		casted.add(new Animation(Condition.TRUE, spell_.getAnimation(), s,
 				new Timeout(f, 5000)));
-		setState(state);
 		spell = spell_;
 	}
 }

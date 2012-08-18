@@ -14,15 +14,15 @@ public class Requirement {
 	public Requirement and_req = null;
 
 	boolean optional;
-	
+
 	public Requirement(int amount_, Value<Integer> id_) {
-		this(amount_,id_,false);
+		this(amount_, id_, false);
 	}
 
 	public Requirement(int amount_, int id_) {
 		this(amount_, new Constant<Integer>(id_), false);
 	}
-	
+
 	public Requirement(int amount_, int id_, boolean optional_) {
 		this(amount_, new Constant<Integer>(id_), optional_);
 	}
@@ -52,9 +52,11 @@ public class Requirement {
 	}
 
 	public boolean validate() {
+		if (optional)
+			return true;
 		if (id.get() == 0
 				|| Inventory.getCount(id.get()) >= Math.max(1, amount)
-				|| optional || Equipment.WEAPON.getEquipped() == id.get()) {
+				|| Equipment.WEAPON.getEquipped() == id.get()) {
 			return and_req != null ? and_req.validate() : true;
 		} else if (or_req != null && or_req.validate()) {
 			return true;

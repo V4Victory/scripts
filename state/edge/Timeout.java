@@ -7,16 +7,21 @@ import scripts.state.State;
 
 public class Timeout extends Edge {
 	Timer timer = null;
+	int timeout;
 	
-	public Timeout(final State state, final int timeout) {
+	public Timeout(final State state, Timeout timeout) {
+		this(state,timeout.timeout);
+	}
+	public Timeout(final State state, final int timeout_) {
 		setCondition(new Condition() {
 			public boolean validate() {
 			if(timer == null) {
-				timer = new Timer(timeout);
+				timer = new Timer(timeout_);
 			}
 			return !timer.isRunning();
 		}});
 		setState(state);
+		timeout = timeout_;
 	}
 	
 	public void cleanup() {

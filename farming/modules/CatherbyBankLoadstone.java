@@ -44,7 +44,8 @@ public class CatherbyBankLoadstone extends Module{
 		}, TELEPORTING) {
 			public void run() {
 				Mouse.move(Widgets.get(1092,43).getCentralPoint());
-				Widgets.get(1092, 43).click(true);
+				Mouse.click(true);
+				//Widgets.get(1092, 43).click(true);
 				Time.sleep(700);
 			}
 		});

@@ -29,10 +29,6 @@ public class LunarTrollheim extends Module {
 
 		Tile[] path = new Tile[] { new Tile(2814, 3679, 0) };
 
-		INITIAL.add(new Equip(Condition.TRUE, INITIAL,
-				Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
-						INITIAL, 5000)));
-
 		INITIAL.add(new MagicCast(Condition.TRUE, TELEPORTING, INITIAL,
 				Magic.Lunar.TeleportTrollheim));
 		TELEPORTING.add(new Animation(Condition.TRUE, 9606, TELEPORTED,

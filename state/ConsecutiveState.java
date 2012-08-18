@@ -13,6 +13,7 @@ public class ConsecutiveState<T> extends State {
 		for (int i = values.length - 1; i >= 0; i--) {
 			currentState = stateCreator.getState(values[i], currentState);
 		}
+		System.out.println("Last: " + "["+currentState.name + "," + currentState.id+"]");
 		return currentState;
 	}
 

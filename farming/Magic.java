@@ -91,6 +91,11 @@ public class Magic {
 	public static void cast(int id) {
 		Spellbook book = getCurrentSpellbook();
 		WidgetChild spell = Widgets.get(getSpellbookWidgetID(book),id);
+		switch(book) {
+		case Standard: Widgets.scroll(spell, Widgets.get(192,94)); break;
+		case Lunar: break;
+		case Ancient: break;
+		}
 		int y = spell.getAbsoluteY();
 		if(y<200 || y>420) {
 			int adjust = 310 - y;

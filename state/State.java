@@ -17,7 +17,9 @@ public class State {
 	
 	public State(State other) {
 		this();
-		edges = other.edges;
+		edges.addAll(other.edges);
+		name = other.name;
+		id = other.id;
 	}
 	
 	public State(String name_) {
@@ -37,7 +39,7 @@ public class State {
 	}
 
 	public State run() {
-		System.out.print(name + " " + id+",");
+		System.out.print("["+name + "," + id+"]");
 		for(Edge edge : edges) {
 			State s = edge.validate();
 			if(s != null) {

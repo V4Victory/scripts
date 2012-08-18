@@ -35,10 +35,6 @@ public class LunarArdougneTele extends Module {
 				new Tile(2645, 3379, 0), new Tile(2652, 3381, 0),
 				new Tile(2660, 3381, 0), new Tile(2664, 3374, 0) };
 
-		INITIAL.add(new Equip(Condition.TRUE, INITIAL,
-				Constants.MudBattleStaff, Equipment.WEAPON, new Timeout(
-						INITIAL, 5000)));
-
 		INITIAL.add(new MagicCast(Condition.TRUE, TELEPORTING, INITIAL,
 				Magic.Lunar.TeleportNorthArdougne));
 		TELEPORTING.add(new Animation(Condition.TRUE, 9606, TELEPORTED,
